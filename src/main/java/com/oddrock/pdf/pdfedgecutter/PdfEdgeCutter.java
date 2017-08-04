@@ -2,8 +2,8 @@ package com.oddrock.pdf.pdfedgecutter;
 
 import java.io.File;
 import java.io.IOException;
-
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
 
@@ -575,13 +575,17 @@ public class PdfEdgeCutter {
 		zoom2SuitableWidth();
 	}
 	
+
+	
+	
 	public static void main(String[] args) throws IOException, AWTException {
 		closeFoxit(FOXIT_APP_NAME);
 		closeFoxit(KANKAN_APP_NAME);
 		robotMngr.delay(MIDDLE_DELAY);
 		openPdfByFoxit(FOXIT_APP_PATH, "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf");
 		preCutPages();
-		for(int i=0;i<30;i++){
+		int pageCount = new PdfManager().pdfPageCount("C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf");
+		for(int i=1;i<=pageCount;i++){
 			cutOnePage();
 			jumpNextPage();
 		}

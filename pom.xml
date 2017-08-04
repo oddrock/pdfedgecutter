@@ -27,7 +27,7 @@
 			<artifactId>jnativehook</artifactId>
 			<version>2.1.0</version>
 		</dependency>
-		
+
 		<!-- logging -->
 		<dependency>
 			<groupId>log4j</groupId>
@@ -38,6 +38,11 @@
 			<groupId>org.slf4j</groupId>
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.7.2</version>
+		</dependency>
+		<dependency>
+			<groupId>com.itextpdf</groupId>
+			<artifactId>itextpdf</artifactId>
+			<version>5.5.11</version>
 		</dependency>
 	</dependencies>
 </project>
