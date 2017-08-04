@@ -605,11 +605,17 @@ public class PdfEdgeCutter {
 		if(suffix.length()>0){
 			fileName = fileName + "." + suffix;
 		}
+		FileUtils.mkdirIfNotExists(dirPath);
 		String destFilePath = dirPath + java.io.File.separator+fileName;
 		saveFoxitPdf(destFilePath);
-		
+		robotMngr.delay(MIDDLE_DELAY);
+		closeFoxit(FOXIT_APP_NAME);
 	}
 	
+	/**
+	 * 保存foxit pdf
+	 * @param destFilePath
+	 */
 	public static void saveFoxitPdf(String destFilePath){
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_F);
@@ -632,7 +638,7 @@ public class PdfEdgeCutter {
 	
 	public static void main(String[] args) throws IOException, AWTException {
 		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf";
-		cutPdfWhiteEdge(pdfFilePath, true, "_切白边", false, "");
+		cutPdfWhiteEdge(pdfFilePath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian");
 		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\123.pdf";
 		closeFoxit(FOXIT_APP_NAME);
 		robotMngr.delay(MIDDLE_DELAY);

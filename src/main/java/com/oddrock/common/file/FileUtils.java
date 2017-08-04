@@ -126,6 +126,13 @@ public class FileUtils {
 		return destDirPath+java.io.File.separator+fileName;
 	}
 	
+	public static void mkdirIfNotExists(String dirPath){
+		File dirname = new File(dirPath);
+		if (!dirname.isDirectory()){ //目录不存在
+		     dirname.mkdir(); //创建目录
+		}  
+	}
+	
 	public static void main(String[] args){
 		String filePath = "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf";
 		System.out.println(getFileNameWithoutSuffixFromFilePath(filePath));
