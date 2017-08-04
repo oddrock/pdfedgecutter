@@ -22,9 +22,7 @@ public class PdfEdgeCutter {
 	private static final String FOXIT_APP_PATH = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
 	private static final String FOXIT_APP_NAME = "Foxit Phantom.exe";
 	private static final String KANKAN_APP_NAME = "KanKan.exe";
-	private static final int OPEN_DELAY = 2000;
-	private static final int MIDDLE_DELAY = 300;
-	private static final int MIN_DELAY = 100;
+	
 	// 认定像素点为白色时的R/G/B最小值
 	private static final int MIN_R = 250;
 	private static final int MIN_G = 250;
@@ -34,9 +32,6 @@ public class PdfEdgeCutter {
 	private static final int SCREEN_CAPTURE_CUTPAGE_Y = 258;
 	private static final int SCREEN_CAPTURE_CUTPAGE_WIDTH = 396;
 	private static final int SCREEN_CAPTURE_CUTPAGE_HEIGHT = 441;
-	/* 	判断基准线和PDF文字内容是否存在交叉的非白点的阀值。
-		如果基准线一侧的非白点的个数高于这个阀值，就判断基准线和PDF内容存在交叉。 */
-	private static final int CROSS_POINT_THRESHOLD = 6;
 	
 	private static final int BAD_POINT_COUNT_THRESHOLD = 6;
 	private static final double BAD_POINT_PROPORTION_THRESHOLD = 0.02;
@@ -44,23 +39,14 @@ public class PdfEdgeCutter {
 	
 	private static final double FOXIT_PDF_WIDTH = 7.01;
 	private static final double FOXIT_PDF_HEIGHT = 9.19;
+	
 	private static final int DEALY_JUMP_NEXT_PAGE = 800;
+	private static final int DELAY_AFTER_OPEN_PDF = 2000;
+	private static final int MIDDLE_DELAY = 300;
+	private static final int MIN_DELAY = 100;
 	
 
-	public static CmdResult openPdfByFoxit(String foxitAppPath, String pdfPath) {
-		return CmdExecutor.getSingleInstance().exeCmd(
-				foxitAppPath + " " + pdfPath);
-	}
 
-	public static CmdResult closeFoxit(String foxitAppName) {
-		return CmdExecutor.getSingleInstance().exeCmd(
-				"taskkill /f /im \"" + foxitAppName + "\"");
-	}
-	
-	public static CmdResult closeKanKan(String kankanAppName){
-		return CmdExecutor.getSingleInstance().exeCmd(
-				"taskkill /f /im \"" + kankanAppName + "\"");
-	}
 
 	public static RobotManager robotMngr;
 	static {
@@ -72,12 +58,42 @@ public class PdfEdgeCutter {
 	}
 
 	/**
+	 * 使用foxit打开一个pdf
+	 * @param foxitAppPath
+	 * @param pdfPath
+	 * @return
+	 */
+	public static CmdResult openPdfByFoxit(String foxitAppPath, String pdfPath) {
+		return CmdExecutor.getSingleInstance().exeCmd(
+				foxitAppPath + " " + pdfPath);
+	}
+	
+	/**
+	 * 关闭foxit
+	 * @param foxitAppName
+	 * @return
+	 */
+	public static CmdResult closeFoxit(String foxitAppName) {
+		return CmdExecutor.getSingleInstance().exeCmd(
+				"taskkill /f /im \"" + foxitAppName + "\"");
+	}
+	
+	/**
+	 * 关闭看看
+	 * @param kankanAppName
+	 * @return
+	 */
+	public static CmdResult closeKanKan(String kankanAppName){
+		return CmdExecutor.getSingleInstance().exeCmd(
+				"taskkill /f /im \"" + kankanAppName + "\"");
+	}
+	/**
 	 * 视图 | 缩放 | 实际大小
 	 * 
 	 * @throws AWTException
 	 */
 	public static void zoom2SuitablePage() throws AWTException {
-		robotMngr.delay(OPEN_DELAY);
+		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_2);
 	}
 	
@@ -87,7 +103,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	public static void zoom2SuitableWidth() throws AWTException {
-		robotMngr.delay(OPEN_DELAY);
+		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_P);
 		robotMngr.pressKey(KeyEvent.VK_S);
@@ -155,56 +171,6 @@ public class PdfEdgeCutter {
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
 		robotMngr.pressKey(KeyEvent.VK_C);
 	}
-
-	/**
-	 * 开始裁剪页面顶部
-	 * 
-	 * @throws AWTException
-	 */
-	public static void startCutPageTop() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
-		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
-		robotMngr.pressKey(KeyEvent.VK_C);
-	}
-
-	/**
-	 * 开始裁剪页面底部
-	 * 
-	 * @throws AWTException
-	 */
-	public static void startCutPageBottom() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
-		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
-		robotMngr.pressKey(KeyEvent.VK_C);
-		robotMngr.pressTab();
-	}
-
-	/**
-	 * 开始裁剪页面右面
-	 * 
-	 * @throws AWTException
-	 */
-	public static void startCutPageRight() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
-		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
-		robotMngr.pressKey(KeyEvent.VK_C);
-		robotMngr.pressTab();
-		robotMngr.pressTab();
-	}
-
-	/**
-	 * 开始裁剪页面左面
-	 * 
-	 * @throws AWTException
-	 */
-	public static void startCutPageLeft() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
-		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
-		robotMngr.pressKey(KeyEvent.VK_C);
-		robotMngr.pressTab();
-		robotMngr.pressTab();
-		robotMngr.pressTab();
-	}
 	
 	/**
 	 * count的单位是0.1英寸
@@ -227,181 +193,6 @@ public class PdfEdgeCutter {
 		
 	}
 	
-	
-	
-
-	
-	
-	/**
-	 * 切页面顶部白边
-	 * @throws AWTException
-	 */
-	public static void cutPageTop() throws AWTException{
-		robotMngr.delay(MIN_DELAY);
-		startCutPageTop();
-		getPageTopBaseline();
-		robotMngr.pressEnter();
-	}
-	
-	/**
-	 * 切页面底部白边
-	 * @throws AWTException
-	 * @throws IOException 
-	 */
-	public static void cutPageBottom() throws AWTException, IOException{
-		robotMngr.delay(MIN_DELAY);
-		startCutPageBottom();
-		/*horizontalDistance(2);
-		BufferedImage image = screenCaptureCutPage();
-		System.out.println(image.getHeight());
-		int RGB = image.getRGB(3, image.getHeight()-19);
-		int R =(RGB & 0xff0000 ) >> 16 ;
-		int G= (RGB & 0xff00 ) >> 8 ;
-		int B= (RGB & 0xff );
-		System.out.println(R + ","+G+","+B);
-		robotMngr.delay(MIN_DELAY);
-		File file = new File("C:\\Users\\oddro\\Desktop\\screencapture.jpg");
-		ImageIO.write(image, "jpg", file);
-		String cmd = "C:\\Program Files (x86)\\Meitu\\KanKan\\KanKan.exe C:\\Users\\oddro\\Desktop\\screencapture.jpg";
-		CmdExecutor.getSingleInstance().exeCmd(cmd);
-		System.out.println(findEndYOfBottomBaseline(screenCaptureCutPage()));*/
-		getPageBottomBaseline();
-		robotMngr.pressEnter();
-	}
-	
-	/**
-	 * 获得页面底部白边基准线
-	 */
-	private static void getPageBottomBaseline() {
-		robotMngr.delay(MIN_DELAY);
-		BufferedImage image = screenCaptureCutPage();
-		int height = image.getHeight();
-		int cutInch = image.getHeight()-3;
-		while(cutInch>=1){	
-			ajustSize(1);
-			image = screenCaptureCutPage();
-			if(isHorizontalBaselineCrossWithContent(image, findEndYOfBottomBaseline(image))){
-				if(cutInch<=height){
-					ajustSize(-1);
-				}
-				break;
-			}
-			cutInch++;
-		}
-	}
-
-	/**
-	 * 获得页面顶部白边的基准线
-	 */
-	public static void getPageTopBaseline(){
-		robotMngr.delay(MIN_DELAY);
-		BufferedImage image = screenCaptureCutPage();
-		int height = image.getHeight();
-		int cutInch = 1;
-		while(cutInch<=height){	
-			ajustSize(1);
-			image = screenCaptureCutPage();
-			if(isHorizontalBaselineCrossWithContent(image, findEndYOfTopBaseline(image))){
-				if(cutInch>=1){
-					ajustSize(-1);
-				}
-				break;
-			}
-			cutInch++;
-		}
-	}
-	
-	/**
-	 * 寻找切白边时下基准线上沿的Y坐标值（基准线上1个像素）
-	 * @param image
-	 * @return
-	 */
-	private static int findEndYOfBottomBaseline(BufferedImage image) {
-		int height = image.getHeight();
-		int startY = height-2;
-		int endY = 1;
-		for(int y=height-2; y>1; y--){
-			if(!isWhitePoint(image,3,y)){
-				startY = y;	
-				break;
-			}
-		}
-		for(int y=startY-1; y>1; y--){
-			if(isWhitePoint(image,3,y)){
-				endY = y;		
-				break;
-			}
-		}
-		return endY;
-	}
-
-	/**
-	 * 寻找切白边时上基准线下沿的Y坐标值（基准线下1个像素）
-	 * @param image
-	 * @return
-	 */
-	public static int findEndYOfTopBaseline(BufferedImage image){
-		int height = image.getHeight();
-		int startY = 2;
-		int endY = height;
-		for(int y=2; y<=height; y++){
-			if(!isWhitePoint(image,3,y)){
-				startY = y;	
-				break;
-			}
-		}
-		for(int y=startY+1; y<=height; y++){
-			if(isWhitePoint(image,3,y)){
-				endY = y;		
-				break;
-			}
-		}
-		return endY;
-	}
-	
-	/**
-	 * 检查水平线是否与PDF的内容交叉了
-	 * @param image
-	 * @param y	水平基准线的上沿或下沿的Y坐标值
-	 * @return
-	 */
-	public static boolean isHorizontalBaselineCrossWithContent(BufferedImage image, int y){
-		int startX = 3;
-		int endX = image.getWidth()-3;
-		int crossCount = 0;
-		for(int x=startX; x<=endX;  x++){
-			if(!isWhitePoint(image, x, y)){
-				crossCount++;
-			}
-		}
-		if(crossCount>=CROSS_POINT_THRESHOLD){
-			return true;
-		}else{
-			return false;
-		}
-	}
-	
-	/**
-	 * 检查垂直基准线是否与PDF的内容交叉了
-	 * @param image
-	 * @param x	垂直基准线的左沿或右沿的Y坐标值
-	 * @return
-	 */
-	public static boolean isVerticalBaselineCrossWithContent(BufferedImage image, int x){
-		int startY = 3;
-		int endY = image.getHeight()-3;
-		int crossCount = 0;
-		for(int y=startY; y<=endY;  y++){
-			if(!isWhitePoint(image, x, y)){
-				crossCount++;
-			}
-		}
-		if(crossCount>=CROSS_POINT_THRESHOLD){
-			return true;
-		}else{
-			return false;
-		}
-	}
 	
 	/**
 	 * 将切边页面截图
