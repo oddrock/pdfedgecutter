@@ -103,10 +103,10 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	public static void zoom2SuitableWidth() throws AWTException {
-		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.delay(MIN_DELAY);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
-		robotMngr.pressKey(KeyEvent.VK_P);
-		robotMngr.pressKey(KeyEvent.VK_S);
+		robotMngr.pressKey(KeyEvent.VK_Z);
+		robotMngr.pressKey(KeyEvent.VK_W);
 	}
 
 	/**
@@ -120,6 +120,18 @@ public class PdfEdgeCutter {
 		robotMngr.pressKey(KeyEvent.VK_P);
 		robotMngr.pressKey(KeyEvent.VK_S);
 	}
+	
+	/**
+	 * 视图 | 页面布局 | 连续
+	 * 
+	 * @throws AWTException
+	 */
+	public static void conitnuousPage() throws AWTException {
+		robotMngr.delay(MIN_DELAY);
+		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
+		robotMngr.pressKey(KeyEvent.VK_P);
+		robotMngr.pressKey(KeyEvent.VK_C);
+	}
 
 	/**
 	 * 视图 | 跳至 | 第一页
@@ -127,7 +139,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	public static void jumpFirstPage() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(DEALY_JUMP_NEXT_PAGE);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_G);
 		robotMngr.pressKey(KeyEvent.VK_F);
@@ -548,9 +560,19 @@ public class PdfEdgeCutter {
 	 * @throws AWTException 
 	 */
 	public static void preCutPages() throws AWTException{
-		zoom2SuitablePage();
-		singlePage();
 		jumpFirstPage();
+		singlePage();
+		zoom2SuitablePage();
+	}
+	
+	/**
+	 * 切白边后工作，页面连续，调整至适合宽度，回到第一页
+	 * @throws AWTException
+	 */
+	public static void postCutPages() throws AWTException{
+		jumpFirstPage();
+		conitnuousPage();
+		zoom2SuitableWidth();
 	}
 	
 	public static void main(String[] args) throws IOException, AWTException {
@@ -559,12 +581,11 @@ public class PdfEdgeCutter {
 		robotMngr.delay(MIDDLE_DELAY);
 		openPdfByFoxit(FOXIT_APP_PATH, "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf");
 		preCutPages();
-		/*jumpSpecPage(2);
-		cutPage();*/
 		for(int i=0;i<30;i++){
 			cutOnePage();
 			jumpNextPage();
 		}
+		postCutPages();
 		//jumpSpecPage(672);	
 		/*BufferedImage image = screenCaptureCutPage();
 		int y = findEndYOfTopBaseline(image);
