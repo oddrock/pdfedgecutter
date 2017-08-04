@@ -2,8 +2,11 @@ package com.oddrock.pdf.pdfedgecutter;
 
 import java.io.File;
 import java.io.IOException;
+
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.pdf.PdfManager;
+import com.oddrock.common.windows.ClipboardUtils;
 import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
 
@@ -243,16 +246,6 @@ public class PdfEdgeCutter {
 			flag = true;
 		}
 		return flag;
-	}
-	
-	/**
-	 * 测试左边黑边宽度
-	 * @return	左边黑边宽度(单位为像素)
-	 */
-	public static int measureLeftBlackEdgeWidth(){
-		// 左边黑边宽度(单位为像素)
-		int LeftBlackEdgeWidth = 0;
-		return LeftBlackEdgeWidth;
 	}
 	
 	/**
@@ -575,21 +568,87 @@ public class PdfEdgeCutter {
 		zoom2SuitableWidth();
 	}
 	
-
-	
-	
-	public static void main(String[] args) throws IOException, AWTException {
+	/**
+	 * 
+	 * @param pdfFilePath
+	 * @param renameFlag	是否改名
+	 * @param addstr		如果改名，在名称后增加addstr这个字符串
+	 * @param newDirFlag	是否保存到新的目录下
+	 * @param newDirPath	如果保存到新的目录下，这是新的目录
+	 * @throws AWTException 
+	 * @throws IOException 
+	 */
+	public static void cutPdfWhiteEdge(String pdfFilePath, 
+			boolean renameFlag, String addstr, boolean newDirFlag, String newDirPath) 
+			throws AWTException, IOException{
 		closeFoxit(FOXIT_APP_NAME);
-		closeFoxit(KANKAN_APP_NAME);
 		robotMngr.delay(MIDDLE_DELAY);
-		openPdfByFoxit(FOXIT_APP_PATH, "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf");
+		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
 		preCutPages();
-		int pageCount = new PdfManager().pdfPageCount("C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf");
-		for(int i=1;i<=pageCount;i++){
+		int pageCount = new PdfManager().pdfPageCount(pdfFilePath);
+		for(int i=1;i<=20;i++){
 			cutOnePage();
 			jumpNextPage();
 		}
 		postCutPages();
+		
+		// 生成文件名
+		String fileName = FileUtils.getFileNameWithoutSuffixFromFilePath(pdfFilePath);
+		String suffix = FileUtils.getFileNameSuffix(pdfFilePath);
+		String dirPath = FileUtils.getDirPathFromFilePath(pdfFilePath);	
+		if(newDirFlag && newDirPath!=null && newDirPath.trim().length()>0){
+			dirPath = newDirPath.trim();
+		}
+		if(renameFlag && addstr!=null && addstr.trim().length()>0){
+			fileName = fileName + addstr;
+		}
+		if(suffix.length()>0){
+			fileName = fileName + "." + suffix;
+		}
+		String destFilePath = dirPath + java.io.File.separator+fileName;
+		saveFoxitPdf(destFilePath);
+		
+	}
+	
+	public static void saveFoxitPdf(String destFilePath){
+		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_F);
+		robotMngr.pressKey(KeyEvent.VK_A);
+		robotMngr.delay(MIDDLE_DELAY);
+		ClipboardUtils.setSysClipboardText(destFilePath);
+		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.clickMouseLeft();
+		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
+		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
+		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.pressKey(KeyEvent.VK_Y);
+	}
+
+	
+	
+	public static void main(String[] args) throws IOException, AWTException {
+		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf";
+		cutPdfWhiteEdge(pdfFilePath, true, "_切白边", false, "");
+		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\123.pdf";
+		closeFoxit(FOXIT_APP_NAME);
+		robotMngr.delay(MIDDLE_DELAY);
+		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
+		saveFoxitPdf(pdfFilePath);*/
+		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf";
+		closeFoxit(FOXIT_APP_NAME);
+		robotMngr.delay(MIDDLE_DELAY);
+		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
+		preCutPages();
+		int pageCount = new PdfManager().pdfPageCount(pdfFilePath);
+		for(int i=1;i<=pageCount;i++){
+			cutOnePage();
+			jumpNextPage();
+		}
+		postCutPages();*/
 		//jumpSpecPage(672);	
 		/*BufferedImage image = screenCaptureCutPage();
 		int y = findEndYOfTopBaseline(image);
