@@ -7,6 +7,7 @@ import com.itextpdf.text.pdf.PdfReader;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.pdf.PdfManager;
+import com.oddrock.common.pdf.PdfSize;
 import com.oddrock.common.windows.ClipboardUtils;
 import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
@@ -511,15 +512,7 @@ public class PdfEdgeCutter {
 	 * 切一个页面的白边
 	 * @throws AWTException
 	 */
-	private void cutOnePage(PdfReader pf, int pageNum, boolean... realOpt) throws AWTException{
-		/*FoxitPdfPage page = getCurrentPageSize();
-		robotMngr.delay(MIDDLE_DELAY);
-		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_C);
-		double height = page.getHeight();
-		double width = page.getWidth();*/
-		double width = (double)pf.getPageSize(pageNum).getWidth()/(double)72;
-		double height = (double)pf.getPageSize(pageNum).getHeight()/(double)72;
-		
+	private void cutOnePage(int pageNum, double width, double height, boolean... realOpt) throws AWTException{		
 		robotMngr.delay(MIDDLE_DELAY);
 		startCutPage();
 		BufferedImage image = screenCaptureCutPage();
@@ -600,6 +593,7 @@ public class PdfEdgeCutter {
 		robotMngr.delay(MIDDLE_DELAY);
 		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
 		preCutPages();
+		PdfSize pdfSize = new PdfManager().pdfSize(pdfFilePath);
 		int pageCount = new PdfManager().pdfPageCount(pdfFilePath);
 		int endPageNum = pageCount;
 		if(demoFlag){
@@ -609,9 +603,8 @@ public class PdfEdgeCutter {
 				endPageNum = DEMO_PAGE_COUNT;
 			}
 		}
-		PdfReader pf = new PdfReader(pdfFilePath);
 		for(int i=1;i<=endPageNum;i++){
-			cutOnePage(pf, i);
+			cutOnePage(i, pdfSize.getPageWidthInch(i), pdfSize.getPageHeightInch(i));
 			jumpNextPage();
 		}
 		postCutPages();
