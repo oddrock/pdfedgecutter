@@ -3,6 +3,7 @@ package com.oddrock.pdf.pdfedgecutter;
 import java.io.File;
 import java.io.IOException;
 
+import com.itextpdf.text.pdf.PdfReader;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.pdf.PdfManager;
@@ -23,7 +24,6 @@ import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
 public class PdfEdgeCutter {
-	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(PdfEdgeCutter.class);
 	private static final String FOXIT_APP_PATH = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
 	private static final String FOXIT_APP_NAME = "Foxit Phantom.exe";
@@ -67,7 +67,7 @@ public class PdfEdgeCutter {
 	 * @param pdfPath
 	 * @return
 	 */
-	public CmdResult openPdfByFoxit(String foxitAppPath, String pdfPath) {
+	private CmdResult openPdfByFoxit(String foxitAppPath, String pdfPath) {
 		return CmdExecutor.getSingleInstance().exeCmd(
 				foxitAppPath + " " + pdfPath);
 	}
@@ -77,7 +77,7 @@ public class PdfEdgeCutter {
 	 * @param foxitAppName
 	 * @return
 	 */
-	public CmdResult closeFoxit(String foxitAppName) {
+	private CmdResult closeFoxit(String foxitAppName) {
 		return CmdExecutor.getSingleInstance().exeCmd(
 				"taskkill /f /im \"" + foxitAppName + "\"");
 	}
@@ -87,7 +87,8 @@ public class PdfEdgeCutter {
 	 * @param kankanAppName
 	 * @return
 	 */
-	public CmdResult closeKanKan(String kankanAppName){
+	@SuppressWarnings("unused")
+	private CmdResult closeKanKan(String kankanAppName){
 		return CmdExecutor.getSingleInstance().exeCmd(
 				"taskkill /f /im \"" + kankanAppName + "\"");
 	}
@@ -96,7 +97,7 @@ public class PdfEdgeCutter {
 	 * 
 	 * @throws AWTException
 	 */
-	public void zoom2SuitablePage() throws AWTException {
+	private void zoom2SuitablePage() throws AWTException {
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_2);
 	}
@@ -106,7 +107,7 @@ public class PdfEdgeCutter {
 	 * 
 	 * @throws AWTException
 	 */
-	public void zoom2SuitableWidth() throws AWTException {
+	private void zoom2SuitableWidth() throws AWTException {
 		robotMngr.delay(MIN_DELAY);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_Z);
@@ -118,7 +119,7 @@ public class PdfEdgeCutter {
 	 * 
 	 * @throws AWTException
 	 */
-	public void singlePage() throws AWTException {
+	private void singlePage() throws AWTException {
 		robotMngr.delay(MIN_DELAY);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_P);
@@ -130,7 +131,7 @@ public class PdfEdgeCutter {
 	 * 
 	 * @throws AWTException
 	 */
-	public void conitnuousPage() throws AWTException {
+	private void conitnuousPage() throws AWTException {
 		robotMngr.delay(MIN_DELAY);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_P);
@@ -142,7 +143,7 @@ public class PdfEdgeCutter {
 	 * 
 	 * @throws AWTException
 	 */
-	public void jumpFirstPage() throws AWTException {
+	private void jumpFirstPage() throws AWTException {
 		robotMngr.delay(DEALY_JUMP_NEXT_PAGE);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_G);
@@ -154,7 +155,7 @@ public class PdfEdgeCutter {
 	 * 
 	 * @throws AWTException
 	 */
-	public void jumpNextPage() throws AWTException {
+	private void jumpNextPage() throws AWTException {
 		robotMngr.delay(DEALY_JUMP_NEXT_PAGE);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_G);
@@ -166,7 +167,8 @@ public class PdfEdgeCutter {
 	 * 
 	 * @throws AWTException
 	 */
-	public void jumpSpecPage(int pageNum) throws AWTException {
+	@SuppressWarnings("unused")
+	private void jumpSpecPage(int pageNum) throws AWTException {
 		robotMngr.delay(MIN_DELAY);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_G);
@@ -182,7 +184,7 @@ public class PdfEdgeCutter {
 	 * 
 	 * @throws AWTException
 	 */
-	public void startCutPage() throws AWTException {
+	private void startCutPage() throws AWTException {
 		robotMngr.delay(MIN_DELAY);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
 		robotMngr.pressKey(KeyEvent.VK_C);
@@ -192,7 +194,7 @@ public class PdfEdgeCutter {
 	 * count的单位是0.1英寸
 	 * @param i
 	 */
-	public void ajustSize(int count, int... delay){
+	private void ajustSize(int count, int... delay){
 		if(delay.length>0 && delay[0]>0){
 			robotMngr.delay(delay[0]);
 		}
@@ -214,7 +216,7 @@ public class PdfEdgeCutter {
 	 * 将切边页面截图
 	 * @return
 	 */
-	public BufferedImage screenCaptureCutPage(){
+	private BufferedImage screenCaptureCutPage(){
 		robotMngr.delay(MIDDLE_DELAY);
 		return robotMngr.createScreenCapture(new Rectangle(
 				//Toolkit.getDefaultToolkit().getScreenSize()
@@ -232,7 +234,7 @@ public class PdfEdgeCutter {
 	 * @param y
 	 * @return
 	 */
-	public boolean isWhitePoint(BufferedImage image, int x, int y){
+	private boolean isWhitePoint(BufferedImage image, int x, int y){
 		boolean flag = false;
 		int RGB = image.getRGB(x, y);
 		int R =(RGB & 0xff0000 ) >> 16 ;
@@ -253,7 +255,8 @@ public class PdfEdgeCutter {
 	 * 截屏切边时的屏幕
 	 * @throws IOException
 	 */
-	public void showScreenCaptureCutPage() throws IOException{
+	@SuppressWarnings("unused")
+	private void showScreenCaptureCutPage() throws IOException{
 		BufferedImage image = screenCaptureCutPage();
 		File file = new File("C:\\Users\\oddro\\Desktop\\screencapture.jpg");
 		ImageIO.write(image, "jpg", file);
@@ -262,7 +265,7 @@ public class PdfEdgeCutter {
 	}
 	
 	@SuppressWarnings("unused")
-	public boolean isWhiteVerticalLine(BufferedImage image, int x){
+	private boolean isWhiteVerticalLine(BufferedImage image, int x){
 		int height = image.getHeight();
 		int lastWhiteLineMinY = -1;
 		int lastWhiteLineMaxY = -1;
@@ -327,7 +330,7 @@ public class PdfEdgeCutter {
 	 * @param image
 	 * @return
 	 */
-	public int whiteMarginOutterLeftX(BufferedImage image){
+	private int whiteMarginOutterLeftX(BufferedImage image){
 		for(int x=1; x<image.getWidth()/3; x++){
 			if(isWhiteVerticalLine(image, x)){
 				return x;
@@ -341,7 +344,7 @@ public class PdfEdgeCutter {
 	 * @param image
 	 * @return
 	 */
-	public int whiteMarginInnerLeftX(BufferedImage image){
+	private int whiteMarginInnerLeftX(BufferedImage image){
 		int whiteMarginOutterLeftX = whiteMarginOutterLeftX(image);
 		if(whiteMarginOutterLeftX<0){
 			return -1;
@@ -362,7 +365,7 @@ public class PdfEdgeCutter {
 	 * @param image
 	 * @return
 	 */
-	public int whiteMarginOutterRightX(BufferedImage image){
+	private int whiteMarginOutterRightX(BufferedImage image){
 		for(int x=image.getWidth()-1; x>=image.getWidth()/3*2; x--){
 			if(isWhiteVerticalLine(image, x)){
 				return x;
@@ -376,7 +379,7 @@ public class PdfEdgeCutter {
 	 * @param image
 	 * @return
 	 */
-	public int whiteMarginInnerRightX(BufferedImage image){
+	private int whiteMarginInnerRightX(BufferedImage image){
 		int whiteMarginOutterRightX = whiteMarginOutterRightX(image);
 		if(whiteMarginOutterRightX<0){
 			return -1;
@@ -393,7 +396,7 @@ public class PdfEdgeCutter {
 	}
 	
 	@SuppressWarnings("unused")
-	public boolean isWhiteHorizontalLine(BufferedImage image, int y){
+	private boolean isWhiteHorizontalLine(BufferedImage image, int y){
 		int width = image.getWidth();
 		int lastWhiteLineMinY = -1;
 		int lastWhiteLineMaxY = -1;
@@ -453,7 +456,7 @@ public class PdfEdgeCutter {
 		}
 	}
 
-	public int whiteMarginOutterTopY(BufferedImage image){
+	private int whiteMarginOutterTopY(BufferedImage image){
 		for(int y=1; y<image.getHeight()/3; y++){
 			if(isWhiteHorizontalLine(image, y)){
 				return y;
@@ -462,7 +465,7 @@ public class PdfEdgeCutter {
 		return -1;
 	}
 	
-	public int whiteMarginInnerTopY(BufferedImage image){
+	private int whiteMarginInnerTopY(BufferedImage image){
 		int whiteMarginOutterTopY = whiteMarginOutterTopY(image);
 		if(whiteMarginOutterTopY<0){
 			return -1;
@@ -479,7 +482,7 @@ public class PdfEdgeCutter {
 	}
 	
 
-	public int whiteMarginOutterBottomY(BufferedImage image){
+	private int whiteMarginOutterBottomY(BufferedImage image){
 		for(int y=image.getHeight()-1; y>=image.getHeight()/3*2; y--){
 			if(isWhiteHorizontalLine(image, y)){
 				return y;
@@ -488,7 +491,7 @@ public class PdfEdgeCutter {
 		return -1;
 	}
 	
-	public int whiteMarginInnerBottomY(BufferedImage image){
+	private int whiteMarginInnerBottomY(BufferedImage image){
 		int whiteMarginOutterBottomY = whiteMarginOutterBottomY(image);
 		if(whiteMarginOutterBottomY<0){
 			return -1;
@@ -508,20 +511,29 @@ public class PdfEdgeCutter {
 	 * 切一个页面的白边
 	 * @throws AWTException
 	 */
-	public void cutOnePage(boolean... realOpt) throws AWTException{
+	private void cutOnePage(PdfReader pf, int pageNum, boolean... realOpt) throws AWTException{
+		/*FoxitPdfPage page = getCurrentPageSize();
+		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_C);
+		double height = page.getHeight();
+		double width = page.getWidth();*/
+		double width = (double)pf.getPageSize(pageNum).getWidth()/(double)72;
+		double height = (double)pf.getPageSize(pageNum).getHeight()/(double)72;
+		
+		robotMngr.delay(MIDDLE_DELAY);
 		startCutPage();
 		BufferedImage image = screenCaptureCutPage();
-		double left_margin = ((double)whiteMarginInnerLeftX(image)/(double)image.getWidth())*FOXIT_PDF_WIDTH;
+		double left_margin = ((double)whiteMarginInnerLeftX(image)/(double)image.getWidth())*width;
 		double right_margin;
 		if(whiteMarginInnerRightX(image)>0){
-			right_margin = ((double)(image.getWidth()-whiteMarginInnerRightX(image))/(double)image.getWidth())*FOXIT_PDF_WIDTH;
+			right_margin = ((double)(image.getWidth()-whiteMarginInnerRightX(image))/(double)image.getWidth())*width;
 		}else{
 			right_margin = -1;
 		}
-		double top_margin = ((double)whiteMarginInnerTopY(image)/(double)image.getHeight())*FOXIT_PDF_HEIGHT;
+		double top_margin = ((double)whiteMarginInnerTopY(image)/(double)image.getHeight())*height;
 		double bottom_margin;
 		if(whiteMarginInnerBottomY(image)>0){
-			bottom_margin = ((double)(image.getHeight()-whiteMarginInnerBottomY(image))/(double)image.getHeight())*FOXIT_PDF_HEIGHT;
+			bottom_margin = ((double)(image.getHeight()-whiteMarginInnerBottomY(image))/(double)image.getHeight())*height;
 		}else{
 			bottom_margin = -1;
 		}
@@ -544,6 +556,7 @@ public class PdfEdgeCutter {
 			ajustSize((int)Math.floor(right_margin*10));
 			//System.out.println((int)Math.floor(right_margin*10));
 		}
+		robotMngr.delay(1000);
 		if(realOpt.length==0 || realOpt[0]!=false){
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_K);	
 		}	
@@ -553,7 +566,7 @@ public class PdfEdgeCutter {
 	 * 切白边前准备工作，页面单页并且调整至适合页面大小
 	 * @throws AWTException 
 	 */
-	public void preCutPages() throws AWTException{
+	private void preCutPages() throws AWTException{
 		jumpFirstPage();
 		singlePage();
 		zoom2SuitablePage();
@@ -563,7 +576,7 @@ public class PdfEdgeCutter {
 	 * 切白边后工作，页面连续，调整至适合宽度，回到第一页
 	 * @throws AWTException
 	 */
-	public void postCutPages() throws AWTException{
+	private void postCutPages() throws AWTException{
 		jumpFirstPage();
 		conitnuousPage();
 		zoom2SuitableWidth();
@@ -579,7 +592,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException 
 	 * @throws IOException 
 	 */
-	public void cutPdfWhiteEdge(String pdfFilePath, 
+	public void cutWhiteEdge(String pdfFilePath, 
 			boolean renameFlag, String addstr, 
 			boolean newDirFlag, String newDirPath, boolean demoFlag) 
 			throws AWTException, IOException{
@@ -596,8 +609,9 @@ public class PdfEdgeCutter {
 				endPageNum = DEMO_PAGE_COUNT;
 			}
 		}
+		PdfReader pf = new PdfReader(pdfFilePath);
 		for(int i=1;i<=endPageNum;i++){
-			cutOnePage();
+			cutOnePage(pf, i);
 			jumpNextPage();
 		}
 		postCutPages();
@@ -620,13 +634,41 @@ public class PdfEdgeCutter {
 		saveFoxitPdf(destFilePath);
 		robotMngr.delay(MIDDLE_DELAY);
 		closeFoxit(FOXIT_APP_NAME);
+		logger.warn("切白边完成，【源文件】"+pdfFilePath+"，【目标文件】"+destFilePath);
+	}
+	
+	/**
+	 * 批量切一个文件夹下的PDF文件的白边
+	 * @param pdfDirPath
+	 * @param renameFlag
+	 * @param addstr
+	 * @param newDirFlag
+	 * @param newDirPath
+	 * @throws IOException 
+	 * @throws AWTException 
+	 */
+	public void cutWhiteEdgeBatch(String pdfDirPath, 
+			boolean renameFlag, String addstr, 
+			boolean newDirFlag, String newDirPath) throws AWTException, IOException{
+		File srcDir = new File(pdfDirPath);
+		if (!srcDir.exists() || !srcDir.isDirectory()) {
+			return;
+		}
+		File[] files = srcDir.listFiles();
+		for (File file : files) {
+			if(file.isFile()){
+				if(FileUtils.getFileNameSuffix(file.getName()).equalsIgnoreCase("pdf")){
+					cutWhiteEdge(file.getAbsolutePath(), renameFlag, addstr, newDirFlag, newDirPath, false);
+				}
+			}   
+        }
 	}
 	
 	/**
 	 * 保存foxit pdf
 	 * @param destFilePath
 	 */
-	public void saveFoxitPdf(String destFilePath){
+	private void saveFoxitPdf(String destFilePath){
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_F);
 		robotMngr.pressKey(KeyEvent.VK_A);
@@ -644,12 +686,90 @@ public class PdfEdgeCutter {
 		robotMngr.pressKey(KeyEvent.VK_Y);
 	}
 
-	
+	/**
+	 * 获得当前页面的尺寸
+	 * @return
+	 * @throws AWTException
+	 */
+	private FoxitPdfPage getCurrentPageSize() throws AWTException{
+		FoxitPdfPage page = new FoxitPdfPage();
+		robotMngr.delay(MIN_DELAY);
+		startCutPage();
+		
+		// 开始测量高度
+		robotMngr.delay(MIN_DELAY);
+		for(int i=0;i<200;i++){
+			robotMngr.delay(10);
+			robotMngr.pressUp();
+		}
+		robotMngr.delay(MIN_DELAY);
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+		robotMngr.delay(MIN_DELAY);
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_C);
+		double height = Double.parseDouble(ClipboardUtils.getSysClipboardText());
+		double lastHeight = height;
+		while(true){
+			robotMngr.delay(10);
+			robotMngr.pressUp();
+			robotMngr.delay(MIDDLE_DELAY);
+			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+			robotMngr.delay(MIDDLE_DELAY);
+			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_C);
+			height = Double.parseDouble(ClipboardUtils.getSysClipboardText());
+			if(lastHeight==height){
+				break;
+			}else{
+				lastHeight = height;
+			}
+		}
+		
+		// 开始测量宽度
+		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.pressTab();
+		robotMngr.pressTab();
+		for(int i=0;i<160;i++){
+			robotMngr.delay(10);
+			robotMngr.pressUp();
+		}
+		robotMngr.delay(MIN_DELAY);
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+		robotMngr.delay(MIN_DELAY);
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_C);
+		double width = Double.parseDouble(ClipboardUtils.getSysClipboardText());
+		double lastWidth = width;
+		while(true){
+			robotMngr.delay(10);
+			robotMngr.pressUp();
+			robotMngr.delay(MIDDLE_DELAY);
+			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+			robotMngr.delay(MIDDLE_DELAY);
+			robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_C);
+			width = Double.parseDouble(ClipboardUtils.getSysClipboardText());
+			if(lastWidth==width){
+				break;
+			}else{
+				lastWidth = width;
+			}
+		}
+		
+		page.setHeight(lastHeight);
+		page.setWidth(lastWidth);
+		return page;
+	}
 	
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException {
-		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf";
 		PdfEdgeCutter cutter = new PdfEdgeCutter();
-		cutter.cutPdfWhiteEdge(pdfFilePath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", false);
-		System.exit(0);
+		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf";
+		cutter.cutWhiteEdge(pdfFilePath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);
+		
+		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf";
+		cutter.closeFoxit(FOXIT_APP_NAME);
+		cutter.robotMngr.delay(MIDDLE_DELAY);
+		cutter.openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
+		cutter.robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		cutter.preCutPages();
+		cutter.robotMngr.delay(MIN_DELAY);
+		cutter.getCurrentPageSize();
+		System.exit(0);*/
 	}
 }
