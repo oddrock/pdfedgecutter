@@ -38,7 +38,7 @@ public class PdfEdgeCutter {
 	
 	private static final int BAD_POINT_COUNT_THRESHOLD = 6;
 	private static final double BAD_POINT_PROPORTION_THRESHOLD = 0.02;
-	private static final double WHITELINE_HEIGHT_PROPORTION = 0.8;
+	private static final double WHITELINE_PROPORTION = 0.8;
 
 	
 	private static final int DEALY_JUMP_NEXT_PAGE = 800;
@@ -47,12 +47,17 @@ public class PdfEdgeCutter {
 	private static final int MIN_DELAY = 100;
 	private static final int DEMO_PAGE_COUNT = 20;
 	
+	// 调整步长，每几个像素做一条线测试是否是白边
+	private static final int AJDUST_STEP_LENGTH = 1;
+	
 	private RobotManager robotMngr;
 	
-	public PdfEdgeCutter() throws AWTException, NativeHookException{
+	public PdfEdgeCutter(boolean needEscKey) throws AWTException, NativeHookException{
 		robotMngr = new RobotManager();
-		GlobalScreen.registerNativeHook();//初始化ESC钩子 
-        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
+		if(needEscKey){
+			GlobalScreen.registerNativeHook();//初始化ESC钩子 
+	        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
+		}
 	}
 
 	/**
@@ -163,7 +168,6 @@ public class PdfEdgeCutter {
 	 * 
 	 * @throws AWTException
 	 */
-	@SuppressWarnings("unused")
 	private void jumpSpecPage(int pageNum) throws AWTException {
 		robotMngr.delay(MIN_DELAY);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
@@ -181,7 +185,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void startCutPage() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(MIDDLE_DELAY);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
 		robotMngr.pressKey(KeyEvent.VK_C);
 	}
@@ -260,65 +264,37 @@ public class PdfEdgeCutter {
 		CmdExecutor.getSingleInstance().exeCmd(cmd);
 	}
 	
-	@SuppressWarnings("unused")
 	private boolean isWhiteVerticalLine(BufferedImage image, int x){
 		int height = image.getHeight();
-		int lastWhiteLineMinY = -1;
-		int lastWhiteLineMaxY = -1;
-		int lastNotwhitePointCount = 0;
-		int whiteLineMinY = -1;
-		int whiteLineMaxY = -1;
-		int notwhitePointCount = 0;		// 非白色点个数
-		boolean firstFind = true;
-		boolean findWhiteLine = false;
-		for(int y=1; y<=height-1; y++){
+		int curLineStartY = -1;
+		int curLineEndY = -1;
+		int badPointCount = 0;		// 非白色点个数
+		for(int y=1; y<=height-1; y++){	
 			if(isWhitePoint(image, x ,y)){
-				if(findWhiteLine){
-					if(firstFind){
-						lastWhiteLineMaxY = y;
-					}
-					whiteLineMaxY = y;
+				if(curLineStartY>0){
+					curLineEndY = y;
 				}else{
-					findWhiteLine = true;
-					if(firstFind){
-						lastWhiteLineMinY = y;
-						lastWhiteLineMaxY = y;
-						lastNotwhitePointCount = 0;
-					}
-					notwhitePointCount = 0;
-					whiteLineMinY = y;
-					whiteLineMaxY = y;
-				}
-			}else{
-				if(findWhiteLine){
-					notwhitePointCount++;
-					if(firstFind){
-						lastNotwhitePointCount++;
-					}
-					if(notwhitePointCount>BAD_POINT_COUNT_THRESHOLD){
-						if(firstFind){
-							firstFind = false;
-						}else{
-							if((whiteLineMaxY-whiteLineMinY)>(lastWhiteLineMaxY-lastWhiteLineMinY)){
-								notwhitePointCount = notwhitePointCount -1;
-								if(((double)notwhitePointCount/(double)(whiteLineMaxY-whiteLineMinY))
-										<=BAD_POINT_PROPORTION_THRESHOLD){
-									lastWhiteLineMaxY = whiteLineMaxY;
-									lastWhiteLineMinY = whiteLineMinY;
-									lastNotwhitePointCount = notwhitePointCount;
-								}		
-							}
-						}
-						findWhiteLine = false;
-					}
+					curLineStartY = y;
 				}
 			}
+			if(curLineStartY>0 && curLineEndY>0 && (!isWhitePoint(image, x ,y) || y==height-1)){
+				if(badPointCount<=BAD_POINT_COUNT_THRESHOLD){
+					if(((double)badPointCount/(double)(curLineEndY-curLineStartY))
+							<=BAD_POINT_PROPORTION_THRESHOLD){
+						if(((double)(curLineEndY-curLineStartY)/(double)height)>=WHITELINE_PROPORTION){
+							return true;
+						}
+					}
+					curLineEndY = -1;
+					curLineStartY = -1;
+					badPointCount = 0;
+				}
+			}
+			if(!isWhitePoint(image, x ,y) && curLineStartY>0){
+				badPointCount++;
+			}
 		}
-		if(((double)(lastWhiteLineMaxY-lastWhiteLineMinY)/(double)height)>=WHITELINE_HEIGHT_PROPORTION){
-			return true;
-		}else{
-			return false;
-		}
+		return false;
 	}
 	
 	/**
@@ -327,7 +303,7 @@ public class PdfEdgeCutter {
 	 * @return
 	 */
 	private int whiteMarginOutterLeftX(BufferedImage image){
-		for(int x=1; x<image.getWidth()/3; x++){
+		for(int x=1; x<image.getWidth()/3; x=x+AJDUST_STEP_LENGTH){
 			if(isWhiteVerticalLine(image, x)){
 				return x;
 			}
@@ -346,7 +322,7 @@ public class PdfEdgeCutter {
 			return -1;
 		}
 		int value = -1;
-		for(int x=whiteMarginOutterLeftX; x<image.getWidth()/3; x++){
+		for(int x=whiteMarginOutterLeftX; x<image.getWidth()/3; x=x+AJDUST_STEP_LENGTH){
 			if(isWhiteVerticalLine(image, x)){
 				value = x;
 			}else{
@@ -362,7 +338,7 @@ public class PdfEdgeCutter {
 	 * @return
 	 */
 	private int whiteMarginOutterRightX(BufferedImage image){
-		for(int x=image.getWidth()-1; x>=image.getWidth()/3*2; x--){
+		for(int x=image.getWidth()-AJDUST_STEP_LENGTH; x>=image.getWidth()/3*2; x=x-AJDUST_STEP_LENGTH){
 			if(isWhiteVerticalLine(image, x)){
 				return x;
 			}
@@ -381,7 +357,7 @@ public class PdfEdgeCutter {
 			return -1;
 		}
 		int value = -1;
-		for(int x=whiteMarginOutterRightX; x>=image.getWidth()/3*2; x--){
+		for(int x=whiteMarginOutterRightX; x>=image.getWidth()/3*2; x=x-AJDUST_STEP_LENGTH){
 			if(isWhiteVerticalLine(image, x)){
 				value = x;
 			}else{
@@ -391,69 +367,44 @@ public class PdfEdgeCutter {
 		return value;
 	}
 	
-	@SuppressWarnings("unused")
 	private boolean isWhiteHorizontalLine(BufferedImage image, int y){
 		int width = image.getWidth();
-		int lastWhiteLineMinY = -1;
-		int lastWhiteLineMaxY = -1;
-		int lastNotwhitePointCount = 0;
-		int whiteLineMinY = -1;
-		int whiteLineMaxY = -1;
-		int notwhitePointCount = 0;		// 非白色点个数
-		boolean firstFind = true;
-		boolean findWhiteLine = false;
-		for(int x=1; x<=width-1; x++){
-			if(isWhitePoint(image, x, y)){
-				if(findWhiteLine){
-					if(firstFind){
-						lastWhiteLineMaxY = x;
-					}
-					whiteLineMaxY = x;
+		int curLineStartX = -1;
+		int curLineEndX = -1;
+		int badPointCount = 0;		// 非白色点个数
+		for(int x=1; x<=width-1; x++){	
+			if(isWhitePoint(image, x ,y)){
+				if(curLineStartX>0){
+					curLineEndX = x;
 				}else{
-					findWhiteLine = true;
-					if(firstFind){
-						lastWhiteLineMinY = x;
-						lastWhiteLineMaxY = x;
-						lastNotwhitePointCount = 0;
-					}
-					notwhitePointCount = 0;
-					whiteLineMinY = x;
-					whiteLineMaxY = x;
-				}
-			}else{
-				if(findWhiteLine){
-					notwhitePointCount++;
-					if(firstFind){
-						lastNotwhitePointCount++;
-					}
-					if(notwhitePointCount>BAD_POINT_COUNT_THRESHOLD){
-						if(firstFind){
-							firstFind = false;
-						}else{
-							if((whiteLineMaxY-whiteLineMinY)>(lastWhiteLineMaxY-lastWhiteLineMinY)){
-								notwhitePointCount = notwhitePointCount -1;
-								if(((double)notwhitePointCount/(double)(whiteLineMaxY-whiteLineMinY))
-										<=BAD_POINT_PROPORTION_THRESHOLD){
-									lastWhiteLineMaxY = whiteLineMaxY;
-									lastWhiteLineMinY = whiteLineMinY;
-									lastNotwhitePointCount = notwhitePointCount;
-								}		
-							}
-						}
-						findWhiteLine = false;
-					}
+					curLineStartX = x;
 				}
 			}
+			if(curLineStartX>0 && curLineEndX>0 && (!isWhitePoint(image, x ,y) || x==width-1)){
+				if(badPointCount<=BAD_POINT_COUNT_THRESHOLD){
+					if(((double)badPointCount/(double)(curLineEndX-curLineStartX))
+							<=BAD_POINT_PROPORTION_THRESHOLD){
+						if(((double)(curLineEndX-curLineStartX)/(double)width)>=WHITELINE_PROPORTION){
+							return true;
+						}
+					}
+					curLineEndX = -1;
+					curLineStartX = -1;
+					badPointCount = 0;
+				}
+			}
+			if(!isWhitePoint(image, x ,y) && curLineStartX>0){
+				badPointCount++;
+			}
 		}
-		if(((double)(lastWhiteLineMaxY-lastWhiteLineMinY)/(double)width)>=WHITELINE_HEIGHT_PROPORTION){
-			return true;
-		}else{
-			return false;
-		}
+		return false;
+		
+		
+		
 	}
 
 	private int whiteMarginOutterTopY(BufferedImage image){
-		for(int y=1; y<image.getHeight()/3; y++){
+		for(int y=1; y<image.getHeight()/3; y=y+AJDUST_STEP_LENGTH){
 			if(isWhiteHorizontalLine(image, y)){
 				return y;
 			}
@@ -467,7 +418,7 @@ public class PdfEdgeCutter {
 			return -1;
 		}
 		int value = -1;
-		for(int y=whiteMarginOutterTopY; y<image.getHeight()/3; y++){
+		for(int y=whiteMarginOutterTopY; y<image.getHeight()/3; y=y+AJDUST_STEP_LENGTH){
 			if(isWhiteHorizontalLine(image, y)){
 				value = y;
 			}else{
@@ -479,7 +430,7 @@ public class PdfEdgeCutter {
 	
 
 	private int whiteMarginOutterBottomY(BufferedImage image){
-		for(int y=image.getHeight()-1; y>=image.getHeight()/3*2; y--){
+		for(int y=image.getHeight()-AJDUST_STEP_LENGTH; y>=image.getHeight()/3*2; y=y-AJDUST_STEP_LENGTH){
 			if(isWhiteHorizontalLine(image, y)){
 				return y;
 			}
@@ -493,7 +444,7 @@ public class PdfEdgeCutter {
 			return -1;
 		}
 		int value = -1;
-		for(int y=whiteMarginOutterBottomY; y>=image.getHeight()/3*2; y--){
+		for(int y=whiteMarginOutterBottomY; y>=image.getHeight()/3*2; y=y-AJDUST_STEP_LENGTH){
 			if(isWhiteHorizontalLine(image, y)){
 				value = y;
 			}else{
@@ -504,10 +455,10 @@ public class PdfEdgeCutter {
 	}
 	
 	/**
-	 * 切一个页面的白边
+	 * 切当前页面页面的白边
 	 * @throws AWTException
 	 */
-	private void cutOnePage(int pageNum, double width, double height, boolean... realOpt) throws AWTException{		
+	private void cutCurrentPage(double width, double height, boolean... realOpt) throws AWTException{		
 		startCutPage();
 		BufferedImage image = screenCaptureCutPage();
 		double left_margin = ((double)whiteMarginInnerLeftX(image)/(double)image.getWidth())*width;
@@ -596,7 +547,7 @@ public class PdfEdgeCutter {
 			}
 		}
 		for(int i=1;i<=endPageNum;i++){
-			cutOnePage(i, pdfSize.getPageWidthInch(i), pdfSize.getPageHeightInch(i));
+			cutCurrentPage(pdfSize.getPageWidthInch(i), pdfSize.getPageHeightInch(i));
 			timer.countPages();
 			jumpNextPage();
 		}
@@ -662,15 +613,13 @@ public class PdfEdgeCutter {
 	 * @param destFilePath
 	 */
 	private void saveFoxitPdf(String destFilePath){
-		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
-		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_F);
-		robotMngr.pressKey(KeyEvent.VK_A);
-		robotMngr.delay(MIDDLE_DELAY);
 		ClipboardUtils.setSysClipboardText(destFilePath);
-		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_S);
+		/*robotMngr.delay(MIDDLE_DELAY);
 		robotMngr.clickMouseLeft();
 		robotMngr.delay(MIDDLE_DELAY);
-		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);*/
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
@@ -679,14 +628,47 @@ public class PdfEdgeCutter {
 		robotMngr.pressKey(KeyEvent.VK_Y);
 	}
 	
+	/**
+	 * 对某个文件某一页模拟切白边
+	 * @param pdfFilePath
+	 * @param pageNum
+	 * @throws AWTException 
+	 * @throws IOException 
+	 */
+	public void simCutEdgeOnePage(String pdfFilePath, int pageNum) throws AWTException, IOException{
+		closeFoxit(FOXIT_APP_NAME);
+		robotMngr.delay(MIDDLE_DELAY);
+		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
+		preCutPages();
+		jumpSpecPage(pageNum);
+		PdfSize pdfSize = new PdfManager().pdfSize(pdfFilePath);
+		cutCurrentPage(pdfSize.getPageWidthInch(pageNum), pdfSize.getPageHeightInch(pageNum),false);
+	}
+	
+	public boolean isWhiteVerticalLine(String pdfFilePath, int pageNum, int x) throws AWTException{
+		closeFoxit(FOXIT_APP_NAME);
+		robotMngr.delay(MIDDLE_DELAY);
+		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
+		preCutPages();
+		jumpSpecPage(pageNum);
+		startCutPage();
+		BufferedImage image = screenCaptureCutPage();
+		boolean result = isWhiteVerticalLine(image, x);
+		logger.warn(result);
+		return result;
+	}
+	
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException {
-		PdfEdgeCutter cutter = new PdfEdgeCutter();
+		PdfEdgeCutter cutter = new PdfEdgeCutter(true);
 		
-		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\结网.pdf";
-		cutter.cutWhiteEdge(pdfFilePath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", false);*/
+		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf", 
+				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", false);*/
 
 		String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
 		cutter.cutWhiteEdgeBatch(pdfDirPath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian");
+		
+		//cutter.simCutEdgeOnePage("C:\\Users\\oddro\\Desktop\\pdf测试\\结网.pdf", 1);
+		//cutter.isWhiteVerticalLine("C:\\Users\\oddro\\Desktop\\pdf测试\\结网.pdf", 1, 20);
 		
 		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf";
 		cutter.closeFoxit(FOXIT_APP_NAME);

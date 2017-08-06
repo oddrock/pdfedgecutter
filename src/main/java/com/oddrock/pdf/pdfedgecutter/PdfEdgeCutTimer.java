@@ -42,7 +42,7 @@ public class PdfEdgeCutTimer {
 			nowEnd = end;
 		}
 		if(pageCount!=0){
-			return (double)(nowEnd-start)/(double)pdfCount*100;
+			return (double)(nowEnd-start)/(double)1000/(double)pdfCount;
 		}else{
 			return 0;
 		}
