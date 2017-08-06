@@ -2,8 +2,6 @@ package com.oddrock.pdf.pdfedgecutter;
 
 import java.io.File;
 import java.io.IOException;
-
-import com.itextpdf.text.pdf.PdfReader;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.pdf.PdfManager;
@@ -12,14 +10,11 @@ import com.oddrock.common.windows.ClipboardUtils;
 import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
 import com.oddrock.common.windows.GlobalKeyListener;
-
 import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
-
 import javax.imageio.ImageIO;
-
 import org.apache.log4j.Logger;
 import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
@@ -44,9 +39,7 @@ public class PdfEdgeCutter {
 	private static final int BAD_POINT_COUNT_THRESHOLD = 6;
 	private static final double BAD_POINT_PROPORTION_THRESHOLD = 0.02;
 	private static final double WHITELINE_HEIGHT_PROPORTION = 0.8;
-	
-	private static final double FOXIT_PDF_WIDTH = 7.01;
-	private static final double FOXIT_PDF_HEIGHT = 9.19;
+
 	
 	private static final int DEALY_JUMP_NEXT_PAGE = 800;
 	private static final int DELAY_AFTER_OPEN_PDF = 2000;
@@ -70,7 +63,7 @@ public class PdfEdgeCutter {
 	 */
 	private CmdResult openPdfByFoxit(String foxitAppPath, String pdfPath) {
 		return CmdExecutor.getSingleInstance().exeCmd(
-				foxitAppPath + " " + pdfPath);
+				foxitAppPath + " \"" + pdfPath + "\"");
 	}
 	
 	/**
@@ -101,6 +94,10 @@ public class PdfEdgeCutter {
 	private void zoom2SuitablePage() throws AWTException {
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_2);
+	}
+	
+	private void exitFoxitPdf() throws AWTException {
+		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_Q);
 	}
 	
 	/**
@@ -157,10 +154,8 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void jumpNextPage() throws AWTException {
-		robotMngr.delay(DEALY_JUMP_NEXT_PAGE);
-		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
-		robotMngr.pressKey(KeyEvent.VK_G);
-		robotMngr.pressKey(KeyEvent.VK_N);
+		robotMngr.delay(MIN_DELAY);
+		robotMngr.pressRight();
 	}
 
 	/**
@@ -513,7 +508,6 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void cutOnePage(int pageNum, double width, double height, boolean... realOpt) throws AWTException{		
-		robotMngr.delay(MIDDLE_DELAY);
 		startCutPage();
 		BufferedImage image = screenCaptureCutPage();
 		double left_margin = ((double)whiteMarginInnerLeftX(image)/(double)image.getWidth())*width;
@@ -532,24 +526,20 @@ public class PdfEdgeCutter {
 		}
 		if(Math.floor(top_margin*10)>0){
 			ajustSize((int)Math.floor(top_margin*10));
-			//System.out.println((int)Math.floor(top_margin*10));
 		}
 		robotMngr.pressTab();
 		if(Math.floor(bottom_margin*10)>0){
 			ajustSize((int)Math.floor(bottom_margin*10));
-			//System.out.println((int)Math.floor(bottom_margin*10));
 		}
 		robotMngr.pressTab();
 		if(Math.floor(left_margin*10)>0){
 			ajustSize((int)Math.floor(left_margin*10));
-			//System.out.println((int)Math.floor(left_margin*10));
 		}
 		robotMngr.pressTab();
 		if(Math.floor(right_margin*10)>0){
 			ajustSize((int)Math.floor(right_margin*10));
-			//System.out.println((int)Math.floor(right_margin*10));
 		}
-		robotMngr.delay(1000);
+		robotMngr.delay(MIN_DELAY);
 		if(realOpt.length==0 || realOpt[0]!=false){
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_K);	
 		}	
@@ -589,6 +579,8 @@ public class PdfEdgeCutter {
 			boolean renameFlag, String addstr, 
 			boolean newDirFlag, String newDirPath, boolean demoFlag) 
 			throws AWTException, IOException{
+		PdfEdgeCutTimer timer = new PdfEdgeCutTimer();
+		timer.start();
 		closeFoxit(FOXIT_APP_NAME);
 		robotMngr.delay(MIDDLE_DELAY);
 		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
@@ -605,6 +597,7 @@ public class PdfEdgeCutter {
 		}
 		for(int i=1;i<=endPageNum;i++){
 			cutOnePage(i, pdfSize.getPageWidthInch(i), pdfSize.getPageHeightInch(i));
+			timer.countPages();
 			jumpNextPage();
 		}
 		postCutPages();
@@ -625,9 +618,10 @@ public class PdfEdgeCutter {
 		FileUtils.mkdirIfNotExists(dirPath);
 		String destFilePath = dirPath + java.io.File.separator+fileName;
 		saveFoxitPdf(destFilePath);
-		robotMngr.delay(MIDDLE_DELAY);
-		closeFoxit(FOXIT_APP_NAME);
+		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		exitFoxitPdf();
 		logger.warn("切白边完成，【源文件】"+pdfFilePath+"，【目标文件】"+destFilePath);
+		timer.showSpeedPer100Pages();
 	}
 	
 	/**
@@ -643,6 +637,8 @@ public class PdfEdgeCutter {
 	public void cutWhiteEdgeBatch(String pdfDirPath, 
 			boolean renameFlag, String addstr, 
 			boolean newDirFlag, String newDirPath) throws AWTException, IOException{
+		PdfEdgeCutTimer timer = new PdfEdgeCutTimer();
+		timer.start();
 		File srcDir = new File(pdfDirPath);
 		if (!srcDir.exists() || !srcDir.isDirectory()) {
 			return;
@@ -652,9 +648,13 @@ public class PdfEdgeCutter {
 			if(file.isFile()){
 				if(FileUtils.getFileNameSuffix(file.getName()).equalsIgnoreCase("pdf")){
 					cutWhiteEdge(file.getAbsolutePath(), renameFlag, addstr, newDirFlag, newDirPath, false);
+					timer.countPdf();
+					timer.countPages(new PdfManager().pdfPageCount(file.getAbsolutePath()));
 				}
 			}   
         }
+		timer.end();
+		timer.showSpeed();
 	}
 	
 	/**
@@ -675,14 +675,18 @@ public class PdfEdgeCutter {
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
-		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressKey(KeyEvent.VK_Y);
 	}
 	
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException {
 		PdfEdgeCutter cutter = new PdfEdgeCutter();
-		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf";
-		cutter.cutWhiteEdge(pdfFilePath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);
+		
+		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\结网.pdf";
+		cutter.cutWhiteEdge(pdfFilePath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", false);*/
+
+		String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
+		cutter.cutWhiteEdgeBatch(pdfDirPath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian");
 		
 		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf";
 		cutter.closeFoxit(FOXIT_APP_NAME);
@@ -691,7 +695,8 @@ public class PdfEdgeCutter {
 		cutter.robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		cutter.preCutPages();
 		cutter.robotMngr.delay(MIN_DELAY);
-		cutter.getCurrentPageSize();
-		System.exit(0);*/
+		cutter.getCurrentPageSize();*/
+		
+		System.exit(0);
 	}
 }

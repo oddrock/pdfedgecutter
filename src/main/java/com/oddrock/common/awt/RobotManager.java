@@ -66,6 +66,14 @@ public class RobotManager {
 	}
 	
 	/**
+	 * 点击右箭头
+	 * @return
+	 */
+	public RobotManager pressRight() {
+		return pressKey(KeyEvent.VK_RIGHT);
+	}
+	
+	/**
 	 * 点击Tab键
 	 * @return
 	 */
