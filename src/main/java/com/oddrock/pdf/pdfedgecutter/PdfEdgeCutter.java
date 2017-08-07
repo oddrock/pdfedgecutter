@@ -27,9 +27,9 @@ public class PdfEdgeCutter {
 	private static final String KANKAN_APP_NAME = "KanKan.exe";
 	
 	// 认定像素点为白色时的R/G/B最小值
-	private static final int MIN_R = 250;
-	private static final int MIN_G = 250;
-	private static final int MIN_B = 250;
+	private static final int MIN_R = 230;
+	private static final int MIN_G = 230;
+	private static final int MIN_B = 230;
 	// 切白边截图时的X坐标、Y坐标、宽度、高度
 	private static final int SCREEN_CAPTURE_CUTPAGE_X = 902;
 	private static final int SCREEN_CAPTURE_CUTPAGE_Y = 258;
@@ -270,6 +270,7 @@ public class PdfEdgeCutter {
 		int curLineEndY = -1;
 		int badPointCount = 0;		// 非白色点个数
 		for(int y=1; y<=height-1; y++){	
+			//System.out.println(y+" : "+isWhitePoint(image, x ,y));
 			if(isWhitePoint(image, x ,y)){
 				if(curLineStartY>0){
 					curLineEndY = y;
@@ -616,16 +617,14 @@ public class PdfEdgeCutter {
 		ClipboardUtils.setSysClipboardText(destFilePath);
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_S);
-		/*robotMngr.delay(MIDDLE_DELAY);
-		robotMngr.clickMouseLeft();
-		robotMngr.delay(MIDDLE_DELAY);
-		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_A);*/
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
 		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
 		robotMngr.pressKey(KeyEvent.VK_Y);
+		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.pressEnter();
 	}
 	
 	/**
@@ -661,14 +660,15 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException {
 		PdfEdgeCutter cutter = new PdfEdgeCutter(true);
 		
-		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf", 
-				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", false);*/
+		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\金字塔原理_高清版.pdf", 
+				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);*/
 
 		String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
 		cutter.cutWhiteEdgeBatch(pdfDirPath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian");
 		
-		//cutter.simCutEdgeOnePage("C:\\Users\\oddro\\Desktop\\pdf测试\\结网.pdf", 1);
-		//cutter.isWhiteVerticalLine("C:\\Users\\oddro\\Desktop\\pdf测试\\结网.pdf", 1, 20);
+		//cutter.simCutEdgeOnePage("C:\\Users\\oddro\\Desktop\\pdf测试\\启示录 打造用户喜爱的产品.pdf", 11);
+		/*for(int i = 45; i< 66; i++)
+			cutter.isWhiteVerticalLine("C:\\Users\\oddro\\Desktop\\pdf测试\\结网_切白边.pdf", 2, i);*/
 		
 		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf";
 		cutter.closeFoxit(FOXIT_APP_NAME);
