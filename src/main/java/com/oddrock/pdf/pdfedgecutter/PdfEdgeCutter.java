@@ -21,8 +21,6 @@ import org.jnativehook.NativeHookException;
 
 public class PdfEdgeCutter {
 	private static Logger logger = Logger.getLogger(PdfEdgeCutter.class);
-	/*private static final String FOXIT_APP_PATH = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
-	private static final String FOXIT_APP_NAME = "Foxit Phantom.exe";*/
 	@SuppressWarnings("unused")
 	private static final String KANKAN_APP_NAME = "KanKan.exe";
 	
@@ -30,16 +28,10 @@ public class PdfEdgeCutter {
 	private static final int MIN_R = 230;
 	private static final int MIN_G = 230;
 	private static final int MIN_B = 230;
-	// 切白边截图时的X坐标、Y坐标、宽度、高度
-	private static final int SCREEN_CAPTURE_CUTPAGE_X = 902;
-	private static final int SCREEN_CAPTURE_CUTPAGE_Y = 258;
-	private static final int SCREEN_CAPTURE_CUTPAGE_WIDTH = 396;
-	private static final int SCREEN_CAPTURE_CUTPAGE_HEIGHT = 441;
 
 	private static final double BAD_PNT_PROPORTION_THRESHOLD = 0.02;
 	private static final double WHITELINE_PROPORTION = 0.8;
 
-	
 	private static final int DEALY_JUMP_NEXT_PAGE = 800;
 	private static final int DELAY_AFTER_OPEN_PDF = 2000;
 	private static final int MIDDLE_DELAY = 300;
@@ -51,12 +43,10 @@ public class PdfEdgeCutter {
 	
 	private RobotManager robotMngr;
 	private PdfManager pdfMngr;
-	
 	private int scX;
 	private int scY;
 	private int scWidth;
 	private int scHeight;
-	
 	private String foxitAppPath = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
 	private String foxitAppName = "Foxit Phantom.exe";
 	
@@ -75,10 +65,10 @@ public class PdfEdgeCutter {
 			scWidth = scParams[2];
 			scHeight = scParams[3];
 		}else{
-			scX = SCREEN_CAPTURE_CUTPAGE_X;
-			scY = SCREEN_CAPTURE_CUTPAGE_Y;
-			scWidth = SCREEN_CAPTURE_CUTPAGE_WIDTH;
-			scHeight = SCREEN_CAPTURE_CUTPAGE_HEIGHT;
+			scX = 902;
+			scY = 258;
+			scWidth = 396;
+			scHeight = 441;
 		}
 	}
 
