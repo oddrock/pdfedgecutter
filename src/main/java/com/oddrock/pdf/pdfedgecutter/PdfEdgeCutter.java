@@ -52,12 +52,29 @@ public class PdfEdgeCutter {
 	private RobotManager robotMngr;
 	private PdfManager pdfMngr;
 	
-	public PdfEdgeCutter(boolean needEscKey) throws AWTException, NativeHookException{
+	private int scX;
+	private int scY;
+	private int scWidth;
+	private int scHeight;
+	
+	
+	public PdfEdgeCutter(boolean needEscKey, int... scParams) throws AWTException, NativeHookException{
 		robotMngr = new RobotManager();
 		pdfMngr = new PdfManager();
 		if(needEscKey){
 			GlobalScreen.registerNativeHook();//初始化ESC钩子 
 	        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
+		}
+		if(scParams.length>=4){
+			scX = scParams[0];
+			scY = scParams[1];
+			scWidth = scParams[2];
+			scHeight = scParams[3];
+		}else{
+			scX = SCREEN_CAPTURE_CUTPAGE_X;
+			scY = SCREEN_CAPTURE_CUTPAGE_Y;
+			scWidth = SCREEN_CAPTURE_CUTPAGE_WIDTH;
+			scHeight = SCREEN_CAPTURE_CUTPAGE_HEIGHT;
 		}
 	}
 
@@ -221,10 +238,10 @@ public class PdfEdgeCutter {
 		robotMngr.delay(MIDDLE_DELAY);
 		return robotMngr.createScreenCapture(new Rectangle(
 				//Toolkit.getDefaultToolkit().getScreenSize()
-				SCREEN_CAPTURE_CUTPAGE_X,
-				SCREEN_CAPTURE_CUTPAGE_Y,
-				SCREEN_CAPTURE_CUTPAGE_WIDTH,
-				SCREEN_CAPTURE_CUTPAGE_HEIGHT
+				scX,
+				scY,
+				scWidth,
+				scHeight
 				));
 	}
 	
@@ -656,20 +673,30 @@ public class PdfEdgeCutter {
 		return result;
 	}
 	
-	public static void main(String[] args) throws IOException, AWTException, NativeHookException {
-		PdfEdgeCutter cutter = new PdfEdgeCutter(true);
+	public static void main(String[] args) throws IOException, AWTException, NativeHookException {		
+		int scX = 902;
+		int scY = 258;
+		int scWidth = 396;
+		int scHeight = 441;
 		String srcDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
 		String dstDirPath = "C:\\Users\\oddro\\Desktop\\qiebaibian";
 		String apendName = "_切白边";
-		if(args.length>=1){
+		if(args.length>=1 && !args[0].trim().equals("-")){
 			srcDirPath = args[0];
 		}
-		if(args.length>=2){
+		if(args.length>=2 && !args[1].trim().equals("-")){
 			dstDirPath = args[1];
 		}
-		if(args.length>=3){
+		if(args.length>=3 && !args[2].trim().equals("-")){
 			apendName = args[2];
 		}
+		if(args.length>=7){
+			scX = Integer.valueOf(args[3]);
+			scY = Integer.valueOf(args[4]);
+			scWidth = Integer.valueOf(args[5]);
+			scHeight = Integer.valueOf(args[6]);
+		}
+		PdfEdgeCutter cutter = new PdfEdgeCutter(true, scX, scY, scWidth, scHeight);
 		cutter.cutWhiteEdgeBatch(srcDirPath, true, apendName, true, dstDirPath);
 		
 		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\123.pdf", 
