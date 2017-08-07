@@ -1,8 +1,10 @@
 package com.oddrock.common.awt;
 
 import java.awt.AWTException;
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.Toolkit;
 import java.awt.event.InputEvent;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
@@ -16,6 +18,16 @@ public class RobotManager {
 
 	public RobotManager() throws AWTException {
 		robot = new Robot();
+	}
+	
+	public static Dimension getScreenSize(){
+		return Toolkit.getDefaultToolkit().getScreenSize();
+	}
+	
+	public RobotManager moveMouseToRightDownCorner(){
+		Dimension dimension = getScreenSize();
+		robot.mouseMove((int)dimension.getWidth(), (int)dimension.getHeight());
+		return this;
 	}
 
 	/**

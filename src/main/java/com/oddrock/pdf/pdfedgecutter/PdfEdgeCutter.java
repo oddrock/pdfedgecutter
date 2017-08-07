@@ -537,6 +537,7 @@ public class PdfEdgeCutter {
 		timer.start();
 		closeFoxit(FOXIT_APP_NAME);
 		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.moveMouseToRightDownCorner();
 		if(!pdfMngr.canCutPage(pdfFilePath)){	// 检查是否具备切白边条件
 			return;	
 		}

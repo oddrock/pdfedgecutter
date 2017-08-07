@@ -151,18 +151,22 @@ public class PdfManager {
 	public static void main(String[] args) throws IOException{
 		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\Thinking In Java（中文版 第四版）.pdf";
 		PdfReader pr = new PdfReader(pdfFilePath);
-		System.out.println(pr.isEncrypted());
+		/*System.out.println(pr.isEncrypted());
 		System.out.println(pr.is128Key());
 		System.out.println(pr.isAppendable());
 		System.out.println(pr.isTampered());
 		System.out.println(pr.isTagged());
-		pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\《YES！产品经理》.pdf";
+		System.out.println(pr.getFileLength());*/
+		System.out.println(pr.getCertificationLevel());
+		pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\金字塔原理_高清版.pdf";
 		pr = new PdfReader(pdfFilePath);
-		System.out.println(pr.isEncrypted());
+		/*System.out.println(pr.isEncrypted());
 		System.out.println(pr.is128Key());
 		System.out.println(pr.isAppendable());
 		System.out.println(pr.isTampered());
 		System.out.println(pr.isTagged());
-		new PdfManager().extractImage(pdfFilePath, "C:\\Users\\oddro\\Desktop\\片", null);
+		System.out.println(pr.getFileLength());*/
+		System.out.println(pr.getTrailer());
+		//new PdfManager().extractImage(pdfFilePath, "C:\\Users\\oddro\\Desktop\\片", null);
 	}
 }
