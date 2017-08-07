@@ -51,9 +51,11 @@ public class PdfEdgeCutter {
 	private static final int AJDUST_STEP_LENGTH = 1;
 	
 	private RobotManager robotMngr;
+	private PdfManager pdfMngr;
 	
 	public PdfEdgeCutter(boolean needEscKey) throws AWTException, NativeHookException{
 		robotMngr = new RobotManager();
+		pdfMngr = new PdfManager();
 		if(needEscKey){
 			GlobalScreen.registerNativeHook();//初始化ESC钩子 
 	        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
@@ -535,6 +537,9 @@ public class PdfEdgeCutter {
 		timer.start();
 		closeFoxit(FOXIT_APP_NAME);
 		robotMngr.delay(MIDDLE_DELAY);
+		if(!pdfMngr.canCutPage(pdfFilePath)){	// 检查是否具备切白边条件
+			return;	
+		}
 		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
 		preCutPages();
 		PdfSize pdfSize = new PdfManager().pdfSize(pdfFilePath);
@@ -660,7 +665,7 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException {
 		PdfEdgeCutter cutter = new PdfEdgeCutter(true);
 		
-		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\金字塔原理_高清版.pdf", 
+		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\456.pdf", 
 				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);*/
 
 		String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";

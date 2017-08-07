@@ -50,8 +50,39 @@ public class PdfManager {
 		}
 	}
 	
+	/**
+	 * 是否加密
+	 * @param pdfFilePath
+	 * @return
+	 * @throws IOException
+	 */
+	public boolean isEncrypted(String pdfFilePath) throws IOException{
+		PdfReader pr = new PdfReader(pdfFilePath);
+		return pr.isEncrypted();
+	}
+	
+	/**
+	 * 是否可以转换
+	 * @param pdfFilePath
+	 * @return
+	 * @throws IOException
+	 */
+	public boolean canCutPage(String pdfFilePath) throws IOException{
+		if(isEncrypted(pdfFilePath)){
+			logger.warn("文件【"+pdfFilePath+"】已加密，无法转换");
+			return false;
+		}
+		return true;
+	}
+	
 	public static void main(String[] args) throws IOException{
-		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf";
-		new PdfManager().showPdfSize(pdfFilePath);
+		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\456.pdf";
+		PdfReader pr = new PdfReader(pdfFilePath);
+		System.out.println(pr.isEncrypted());
+		System.out.println(pr.is128Key());
+		pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\flume - 副本.pdf";
+		pr = new PdfReader(pdfFilePath);
+		System.out.println(pr.isEncrypted());
+		System.out.println(pr.is128Key());
 	}
 }
