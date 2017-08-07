@@ -483,6 +483,7 @@ public class PdfEdgeCutter {
 		robotMngr.delay(MIN_DELAY);
 		if(realOpt.length==0 || realOpt[0]!=false){
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_K);	
+			robotMngr.pressEnter();	
 		}	
 	}
 	
@@ -658,7 +659,7 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException {
 		PdfEdgeCutter cutter = new PdfEdgeCutter(true);
 		
-		cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\启示录 打造用户喜爱的产品.pdf", 
+		cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\123.pdf", 
 				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);
 
 		/*String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
