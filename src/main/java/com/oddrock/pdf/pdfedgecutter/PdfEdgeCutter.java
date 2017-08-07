@@ -658,12 +658,25 @@ public class PdfEdgeCutter {
 	
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException {
 		PdfEdgeCutter cutter = new PdfEdgeCutter(true);
+		String srcDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
+		String dstDirPath = "C:\\Users\\oddro\\Desktop\\qiebaibian";
+		String apendName = "_切白边";
+		if(args.length>=1){
+			srcDirPath = args[0];
+		}
+		if(args.length>=2){
+			dstDirPath = args[1];
+		}
+		if(args.length>=3){
+			apendName = args[2];
+		}
+		cutter.cutWhiteEdgeBatch(srcDirPath, true, apendName, true, dstDirPath);
 		
-		cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\123.pdf", 
-				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);
+		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\123.pdf", 
+				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);*/
 
-		/*String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
-		cutter.cutWhiteEdgeBatch(pdfDirPath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian");*/
+		//String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
+		
 		
 		//cutter.simCutEdgeOnePage("C:\\Users\\oddro\\Desktop\\pdf测试\\启示录 打造用户喜爱的产品.pdf", 11);
 		/*for(int i = 45; i< 66; i++)
