@@ -1,14 +1,22 @@
 package com.oddrock.common.pdf;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Iterator;
 
 import org.apache.log4j.Logger;
 
 import com.itextpdf.text.Rectangle;
+import com.itextpdf.text.exceptions.UnsupportedPdfException;
+import com.itextpdf.text.pdf.PRStream;
+import com.itextpdf.text.pdf.PdfDictionary;
+import com.itextpdf.text.pdf.PdfName;
+import com.itextpdf.text.pdf.PdfObject;
 import com.itextpdf.text.pdf.PdfReader;
+import com.oddrock.common.file.FileUtils;
 
 public class PdfManager {
-	@SuppressWarnings("unused")
 	private static Logger logger = Logger.getLogger(PdfManager.class);
 
 	public PdfManager() {}
@@ -75,14 +83,86 @@ public class PdfManager {
 		return true;
 	}
 	
+	/**
+	 * 提取PDF中的图片
+	 * @param pdfFilePath
+	 * @param picDirPath
+	 * @param picNamePrefix
+	 */
+	@SuppressWarnings("rawtypes")
+	public void extractImage(String pdfFilePath, String picDirPath, String picNamePrefix){  
+		File file = new File(pdfFilePath);
+		if(!file.exists() || !file.isFile()){
+			return;
+		}
+        if(picDirPath==null || picDirPath.trim().length()==0){
+        	picDirPath = FileUtils.getDirPathFromFilePath(pdfFilePath);
+        }
+        if(picNamePrefix==null || picNamePrefix.trim().length()==0){
+        	picNamePrefix = FileUtils.getFileNameWithoutSuffixFromFilePath(pdfFilePath);
+        }
+        FileUtils.mkdirIfNotExists(picDirPath);
+        PdfReader reader = null;  
+        try {  
+            //读取pdf文件  
+            reader = new PdfReader(pdfFilePath);  
+            //获得pdf文件的页数  
+            int sumPage = reader.getNumberOfPages();      
+            //读取pdf文件中的每一页  
+            for(int i = 1;i <= sumPage;i++){  
+                //得到pdf每一页的字典对象  
+                PdfDictionary dictionary = reader.getPageN(i);  
+                //通过RESOURCES得到对应的字典对象  
+                PdfDictionary res = (PdfDictionary) PdfReader.getPdfObject(dictionary.get(PdfName.RESOURCES));  
+                //得到XOBJECT图片对象  
+                PdfDictionary xobj = (PdfDictionary) PdfReader.getPdfObject(res.get(PdfName.XOBJECT));  
+                if(xobj != null){  
+                    for(Iterator it = xobj.getKeys().iterator();it.hasNext();){  
+                        PdfObject obj = xobj.get((PdfName)it.next());             
+                        if(obj.isIndirect()){  
+                            PdfDictionary tg = (PdfDictionary) PdfReader.getPdfObject(obj);                   
+                            PdfName type = (PdfName) PdfReader.getPdfObject(tg.get(PdfName.SUBTYPE));  
+                            if(PdfName.IMAGE.equals(type)){       
+                                PdfObject object =  PdfReader.getPdfObject(obj);  
+                                if(object.isStream()){                        
+                                    PRStream prstream = (PRStream)object;  
+                                    byte[] b;  
+                                    try{  
+                                        b = PdfReader.getStreamBytes(prstream);  
+                                    }catch(UnsupportedPdfException e){  
+                                        b = PdfReader.getStreamBytesRaw(prstream);  
+                                    }  
+                                    FileOutputStream output = new FileOutputStream(String.format(picDirPath+"\\"+picNamePrefix+"%d.jpg",i));  
+                                    output.write(b);  
+                                    output.flush();  
+                                    output.close();                               
+                                }  
+                            }  
+                        }  
+                    }  
+                }  
+            }  
+              
+        } catch (IOException e) {  
+            e.printStackTrace();  
+        }
+	}
+	
 	public static void main(String[] args) throws IOException{
-		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\456.pdf";
+		String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\Thinking In Java（中文版 第四版）.pdf";
 		PdfReader pr = new PdfReader(pdfFilePath);
 		System.out.println(pr.isEncrypted());
 		System.out.println(pr.is128Key());
-		pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\flume - 副本.pdf";
+		System.out.println(pr.isAppendable());
+		System.out.println(pr.isTampered());
+		System.out.println(pr.isTagged());
+		pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\《YES！产品经理》.pdf";
 		pr = new PdfReader(pdfFilePath);
 		System.out.println(pr.isEncrypted());
 		System.out.println(pr.is128Key());
+		System.out.println(pr.isAppendable());
+		System.out.println(pr.isTampered());
+		System.out.println(pr.isTagged());
+		new PdfManager().extractImage(pdfFilePath, "C:\\Users\\oddro\\Desktop\\片", null);
 	}
 }

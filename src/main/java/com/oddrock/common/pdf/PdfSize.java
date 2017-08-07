@@ -5,27 +5,27 @@ import java.util.Map;
 
 public class PdfSize {
 	public static final double PIXEL_COUNT_PER_INCH = 72;
-	private Map<Integer, PageSize> map = new HashMap<Integer, PageSize>();
-	public Map<Integer, PageSize> getMap() {
+	private Map<Integer, PdfPageSize> map = new HashMap<Integer, PdfPageSize>();
+	public Map<Integer, PdfPageSize> getMap() {
 		return map;
 	}
-	public void setMap(Map<Integer, PageSize> map) {
+	public void setMap(Map<Integer, PdfPageSize> map) {
 		this.map = map;
 	}
 	public void addPageSize(int pageNum, double width, double height){
-		PageSize pageSize = (PageSize)map.get(Integer.valueOf(pageNum));
+		PdfPageSize pageSize = (PdfPageSize)map.get(Integer.valueOf(pageNum));
 		if(pageSize==null){
-			pageSize = new PageSize();
+			pageSize = new PdfPageSize();
 		}
 		pageSize.setWidth(width);
 		pageSize.setHeight(height);
 		map.put(Integer.valueOf(pageNum), pageSize);
 	}
-	public PageSize getPageSize(int pageNum){
-		return (PageSize)map.get(Integer.valueOf(pageNum));
+	public PdfPageSize getPageSize(int pageNum){
+		return (PdfPageSize)map.get(Integer.valueOf(pageNum));
 	}
 	public double getPageWidth(int pageNum){
-		PageSize pageSize = (PageSize)map.get(Integer.valueOf(pageNum));
+		PdfPageSize pageSize = (PdfPageSize)map.get(Integer.valueOf(pageNum));
 		if(pageSize==null){
 			return -1;
 		}else{
@@ -33,7 +33,7 @@ public class PdfSize {
 		}
 	}
 	public double getPageHeight(int pageNum){
-		PageSize pageSize = (PageSize)map.get(Integer.valueOf(pageNum));
+		PdfPageSize pageSize = (PdfPageSize)map.get(Integer.valueOf(pageNum));
 		if(pageSize==null){
 			return -1;
 		}else{

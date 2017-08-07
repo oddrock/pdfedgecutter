@@ -1,6 +1,6 @@
 package com.oddrock.common.pdf;
 
-public class PageSize {
+public class PdfPageSize {
 	private double width;
 	private double height;
 	public double getWidth() {
@@ -15,12 +15,12 @@ public class PageSize {
 	public void setHeight(double height) {
 		this.height = height;
 	}
-	public PageSize(double width, double height) {
+	public PdfPageSize(double width, double height) {
 		super();
 		this.width = width;
 		this.height = height;
 	}
-	public PageSize() {
+	public PdfPageSize() {
 		super();
 	}
 }
