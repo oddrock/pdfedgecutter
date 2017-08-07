@@ -21,8 +21,8 @@ import org.jnativehook.NativeHookException;
 
 public class PdfEdgeCutter {
 	private static Logger logger = Logger.getLogger(PdfEdgeCutter.class);
-	private static final String FOXIT_APP_PATH = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
-	private static final String FOXIT_APP_NAME = "Foxit Phantom.exe";
+	/*private static final String FOXIT_APP_PATH = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
+	private static final String FOXIT_APP_NAME = "Foxit Phantom.exe";*/
 	@SuppressWarnings("unused")
 	private static final String KANKAN_APP_NAME = "KanKan.exe";
 	
@@ -57,14 +57,18 @@ public class PdfEdgeCutter {
 	private int scWidth;
 	private int scHeight;
 	
+	private String foxitAppPath = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
+	private String foxitAppName = "Foxit Phantom.exe";
 	
-	public PdfEdgeCutter(boolean needEscKey, int... scParams) throws AWTException, NativeHookException{
+	public PdfEdgeCutter(boolean needEscKey, String foxitAppPath, String foxitAppName, int... scParams) throws AWTException, NativeHookException{
 		robotMngr = new RobotManager();
 		pdfMngr = new PdfManager();
 		if(needEscKey){
 			GlobalScreen.registerNativeHook();//初始化ESC钩子 
 	        GlobalScreen.addNativeKeyListener(new GlobalKeyListener());
 		}
+		this.foxitAppPath = foxitAppPath;
+		this.foxitAppName = foxitAppName;
 		if(scParams.length>=4){
 			scX = scParams[0];
 			scY = scParams[1];
@@ -540,7 +544,7 @@ public class PdfEdgeCutter {
 			throws AWTException, IOException{
 		PdfEdgeCutTimer timer = new PdfEdgeCutTimer();
 		timer.start();
-		closeFoxit(FOXIT_APP_NAME);
+		closeFoxit(foxitAppName);
 		robotMngr.delay(MIDDLE_DELAY);
 		robotMngr.moveMouseToRightDownCorner();
 		File file = new File(pdfFilePath);
@@ -551,7 +555,7 @@ public class PdfEdgeCutter {
 		if(!pdfMngr.canCutPage(pdfFilePath)){	// 检查是否具备切白边条件
 			return;	
 		}
-		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
+		openPdfByFoxit(foxitAppPath, pdfFilePath);
 		preCutPages();
 		PdfSize pdfSize = new PdfManager().pdfSize(pdfFilePath);
 		int pageCount = new PdfManager().pdfPageCount(pdfFilePath);
@@ -651,9 +655,9 @@ public class PdfEdgeCutter {
 	 * @throws IOException 
 	 */
 	public void simCutEdgeOnePage(String pdfFilePath, int pageNum) throws AWTException, IOException{
-		closeFoxit(FOXIT_APP_NAME);
+		closeFoxit(foxitAppName);
 		robotMngr.delay(MIDDLE_DELAY);
-		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
+		openPdfByFoxit(foxitAppPath, pdfFilePath);
 		preCutPages();
 		jumpSpecPage(pageNum);
 		PdfSize pdfSize = new PdfManager().pdfSize(pdfFilePath);
@@ -661,9 +665,9 @@ public class PdfEdgeCutter {
 	}
 	
 	public boolean isWhiteVerticalLine(String pdfFilePath, int pageNum, int x) throws AWTException{
-		closeFoxit(FOXIT_APP_NAME);
+		closeFoxit(foxitAppName);
 		robotMngr.delay(MIDDLE_DELAY);
-		openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
+		openPdfByFoxit(foxitAppPath, pdfFilePath);
 		preCutPages();
 		jumpSpecPage(pageNum);
 		startCutPage();
@@ -674,29 +678,58 @@ public class PdfEdgeCutter {
 	}
 	
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException {		
+		
+		String foxitAppPath = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
+		String foxitAppName = "Foxit Phantom.exe";
+		boolean needEscKey = true;
+		String srcDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
+		String dstDirPath = "C:\\Users\\oddro\\Desktop\\qiebaibian";
+		String apendName = "_切白边";
 		int scX = 902;
 		int scY = 258;
 		int scWidth = 396;
 		int scHeight = 441;
-		String srcDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
-		String dstDirPath = "C:\\Users\\oddro\\Desktop\\qiebaibian";
-		String apendName = "_切白边";
-		if(args.length>=1 && !args[0].trim().equals("-")){
-			srcDirPath = args[0];
+		int i = 0;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			foxitAppPath = args[i];
 		}
-		if(args.length>=2 && !args[1].trim().equals("-")){
-			dstDirPath = args[1];
+		i++;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			foxitAppName = args[i];
 		}
-		if(args.length>=3 && !args[2].trim().equals("-")){
-			apendName = args[2];
+		i++;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			needEscKey = Boolean.valueOf(args[i]);
 		}
-		if(args.length>=7){
-			scX = Integer.valueOf(args[3]);
-			scY = Integer.valueOf(args[4]);
-			scWidth = Integer.valueOf(args[5]);
-			scHeight = Integer.valueOf(args[6]);
+		i++;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			srcDirPath = args[i];
 		}
-		PdfEdgeCutter cutter = new PdfEdgeCutter(true, scX, scY, scWidth, scHeight);
+		i++;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			dstDirPath = args[i];
+		}
+		i++;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			apendName = args[i];
+		}
+		i++;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			scX = Integer.valueOf(args[i]);
+		}
+		i++;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			scY = Integer.valueOf(args[i]);
+		}
+		i++;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			scWidth = Integer.valueOf(args[i]);
+		}
+		i++;
+		if(args.length>=(i+1) && !args[i].trim().equals("-")){
+			scHeight = Integer.valueOf(args[i]);
+		}
+		PdfEdgeCutter cutter = new PdfEdgeCutter(needEscKey, foxitAppPath, foxitAppName, scX, scY, scWidth, scHeight);
 		cutter.cutWhiteEdgeBatch(srcDirPath, true, apendName, true, dstDirPath);
 		
 		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\123.pdf", 
