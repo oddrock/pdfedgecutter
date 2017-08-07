@@ -35,9 +35,8 @@ public class PdfEdgeCutter {
 	private static final int SCREEN_CAPTURE_CUTPAGE_Y = 258;
 	private static final int SCREEN_CAPTURE_CUTPAGE_WIDTH = 396;
 	private static final int SCREEN_CAPTURE_CUTPAGE_HEIGHT = 441;
-	
-	private static final int BAD_POINT_COUNT_THRESHOLD = 6;
-	private static final double BAD_POINT_PROPORTION_THRESHOLD = 0.02;
+
+	private static final double BAD_PNT_PROPORTION_THRESHOLD = 0.02;
 	private static final double WHITELINE_PROPORTION = 0.8;
 
 	
@@ -242,11 +241,6 @@ public class PdfEdgeCutter {
 		int R =(RGB & 0xff0000 ) >> 16 ;
 		int G= (RGB & 0xff00 ) >> 8 ;
 		int B= (RGB & 0xff );
-		//System.out.println(R + ","+G+","+B);
-		/*Color mycolor = new Color(RGB);
-		int R = mycolor.getRed();
-		int G = mycolor.getGreen();
-		int B = mycolor.getBlue();*/
 		if(R>=MIN_R && G>=MIN_G && B>=MIN_B){
 			flag = true;
 		}
@@ -272,7 +266,6 @@ public class PdfEdgeCutter {
 		int curLineEndY = -1;
 		int badPointCount = 0;		// 非白色点个数
 		for(int y=1; y<=height-1; y++){	
-			//System.out.println(y+" : "+isWhitePoint(image, x ,y));
 			if(isWhitePoint(image, x ,y)){
 				if(curLineStartY>0){
 					curLineEndY = y;
@@ -280,21 +273,18 @@ public class PdfEdgeCutter {
 					curLineStartY = y;
 				}
 			}
-			if(curLineStartY>0 && curLineEndY>0 && (!isWhitePoint(image, x ,y) || y==height-1)){
-				if(badPointCount<=BAD_POINT_COUNT_THRESHOLD){
-					if(((double)badPointCount/(double)(curLineEndY-curLineStartY))
-							<=BAD_POINT_PROPORTION_THRESHOLD){
-						if(((double)(curLineEndY-curLineStartY)/(double)height)>=WHITELINE_PROPORTION){
-							return true;
-						}
-					}
+			if(((double)(curLineEndY-curLineStartY)/(double)height)>=WHITELINE_PROPORTION 
+					&& ((double)badPointCount/(double)(curLineEndY-curLineStartY))<=BAD_PNT_PROPORTION_THRESHOLD){
+				return true;
+			}
+			if(!isWhitePoint(image, x ,y) && curLineStartY>0){
+				if(curLineEndY>0 && ((double)badPointCount/(double)(curLineEndY-curLineStartY))>BAD_PNT_PROPORTION_THRESHOLD){
 					curLineEndY = -1;
 					curLineStartY = -1;
 					badPointCount = 0;
+				}else{
+					badPointCount++;
 				}
-			}
-			if(!isWhitePoint(image, x ,y) && curLineStartY>0){
-				badPointCount++;
 			}
 		}
 		return false;
@@ -383,21 +373,18 @@ public class PdfEdgeCutter {
 					curLineStartX = x;
 				}
 			}
-			if(curLineStartX>0 && curLineEndX>0 && (!isWhitePoint(image, x ,y) || x==width-1)){
-				if(badPointCount<=BAD_POINT_COUNT_THRESHOLD){
-					if(((double)badPointCount/(double)(curLineEndX-curLineStartX))
-							<=BAD_POINT_PROPORTION_THRESHOLD){
-						if(((double)(curLineEndX-curLineStartX)/(double)width)>=WHITELINE_PROPORTION){
-							return true;
-						}
-					}
+			if(((double)badPointCount/(double)(curLineEndX-curLineStartX))<=BAD_PNT_PROPORTION_THRESHOLD
+					&& ((double)(curLineEndX-curLineStartX)/(double)width)>=WHITELINE_PROPORTION){
+				return true;
+			}
+			if(!isWhitePoint(image, x ,y) && curLineStartX>0){
+				if(curLineEndX>0 && ((double)badPointCount/(double)(curLineEndX-curLineStartX))>BAD_PNT_PROPORTION_THRESHOLD){
 					curLineEndX = -1;
 					curLineStartX = -1;
 					badPointCount = 0;
+				}else{
+					badPointCount++;
 				}
-			}
-			if(!isWhitePoint(image, x ,y) && curLineStartX>0){
-				badPointCount++;
 			}
 		}
 		return false;
@@ -538,6 +525,11 @@ public class PdfEdgeCutter {
 		closeFoxit(FOXIT_APP_NAME);
 		robotMngr.delay(MIDDLE_DELAY);
 		robotMngr.moveMouseToRightDownCorner();
+		File file = new File(pdfFilePath);
+		if(!file.exists() && !file.isFile()){
+			logger.warn("文件【"+pdfFilePath+"】不存在");
+			return;
+		}
 		if(!pdfMngr.canCutPage(pdfFilePath)){	// 检查是否具备切白边条件
 			return;	
 		}
@@ -666,11 +658,11 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException {
 		PdfEdgeCutter cutter = new PdfEdgeCutter(true);
 		
-		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\456.pdf", 
-				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);*/
+		cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\启示录 打造用户喜爱的产品.pdf", 
+				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);
 
-		String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
-		cutter.cutWhiteEdgeBatch(pdfDirPath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian");
+		/*String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
+		cutter.cutWhiteEdgeBatch(pdfDirPath, true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian");*/
 		
 		//cutter.simCutEdgeOnePage("C:\\Users\\oddro\\Desktop\\pdf测试\\启示录 打造用户喜爱的产品.pdf", 11);
 		/*for(int i = 45; i< 66; i++)
