@@ -1,5 +1,7 @@
 package com.oddrock.pdf.pdfedgecutter;
 
+import com.oddrock.common.windows.GlobalKeyListener;
+import org.jnativehook.GlobalScreen;
 import java.io.File;
 import java.io.IOException;
 import com.oddrock.common.awt.RobotManager;
@@ -9,14 +11,12 @@ import com.oddrock.common.pdf.PdfSize;
 import com.oddrock.common.windows.ClipboardUtils;
 import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
-import com.oddrock.common.windows.GlobalKeyListener;
 import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 import org.apache.log4j.Logger;
-import org.jnativehook.GlobalScreen;
 import org.jnativehook.NativeHookException;
 
 public class PdfEdgeCutter {
@@ -29,7 +29,7 @@ public class PdfEdgeCutter {
 	private static final int MIN_G = 230;
 	private static final int MIN_B = 230;
 
-	private static final double BAD_PNT_PROPORTION_THRESHOLD = 0.02;
+	private static final double BAD_PNT_PROPORTION_THRESHOLD = 0.01;
 	private static final double WHITELINE_PROPORTION = 0.8;
 
 	private static final int DEALY_JUMP_NEXT_PAGE = 800;
