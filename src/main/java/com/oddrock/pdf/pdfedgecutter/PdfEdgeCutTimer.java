@@ -14,6 +14,15 @@ public class PdfEdgeCutTimer {
 	private long end;
 	private int pageCount;
 	private int pdfCount;
+	public int getPageCount() {
+		return pageCount;
+	}
+	public int getPdfCount() {
+		return pdfCount;
+	}
+	public double getElapsedTimeInSeconds(){
+		return (double)(end-start)/(double)1000;
+	}
 	public void start(){
 		start = System.currentTimeMillis();
 		end = -1;
@@ -53,10 +62,11 @@ public class PdfEdgeCutTimer {
 			return 0;
 		}
 	}
-	public void showSpeed(){
+	public String showSpeed(){
 		java.text.DecimalFormat df = new java.text.DecimalFormat("#.00");
 		String message = "共切白边"+pdfCount+"本，每本耗时"+ df.format(speedPerPdf())+"秒，共切白边"+pageCount+"页，每100页耗时"+df.format(speedPer100Pages())+"秒";
 		logger.warn(message);
+		return message;
 	}
 	public void showSpeedPer100Pages(){
 		java.text.DecimalFormat df = new java.text.DecimalFormat("#.00");

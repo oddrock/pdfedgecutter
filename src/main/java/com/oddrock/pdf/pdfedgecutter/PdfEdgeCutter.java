@@ -1,5 +1,6 @@
 package com.oddrock.pdf.pdfedgecutter;
 
+import com.oddrock.common.DateUtils;
 import com.oddrock.common.windows.GlobalKeyListener;
 
 import org.jnativehook.GlobalScreen;
@@ -56,6 +57,7 @@ public class PdfEdgeCutter {
 	private String foxitAppPath;
 	private String foxitAppName;
 	private int delay_aftersavepdf;
+	private String logPath;
 	
 	public PdfEdgeCutter(boolean needEscKey, String foxitAppPath, String foxitAppName, int... scParams) throws AWTException, NativeHookException{
 		robotMngr = new RobotManager();
@@ -82,6 +84,7 @@ public class PdfEdgeCutter {
 		threshold_whitepnt_rmin = Integer.parseInt(Prop.get("threshold.whitepnt.rmin"));
 		threshold_whitepnt_gmin = Integer.parseInt(Prop.get("threshold.whitepnt.gmin"));
 		threshold_whitepnt_bmin = Integer.parseInt(Prop.get("threshold.whitepnt.bmin"));
+		logPath = Prop.get("log.path");
 	}
 
 	/**
@@ -611,6 +614,7 @@ public class PdfEdgeCutter {
 	public void cutWhiteEdgeBatch(String pdfDirPath, 
 			boolean renameFlag, String addstr, 
 			boolean newDirFlag, String newDirPath, boolean demo) throws AWTException, IOException{
+		FileUtils.writeLineToFile(logPath, "-----切PDF白边  开始时间："+ DateUtils.getFormatTime() +"-----", false);
 		PdfEdgeCutTimer timer = new PdfEdgeCutTimer();
 		timer.start();
 		File srcDir = new File(pdfDirPath);
@@ -624,6 +628,7 @@ public class PdfEdgeCutter {
 					cutWhiteEdge(file.getAbsolutePath(), renameFlag, addstr, newDirFlag, newDirPath, demo);
 					timer.countPdf();
 					timer.countPages(new PdfManager().pdfPageCount(file.getAbsolutePath()));
+					FileUtils.writeLineToFile(logPath, "完成："+file.getName(), true);
 					if(demo){
 						break;
 					}
@@ -632,6 +637,12 @@ public class PdfEdgeCutter {
         }
 		timer.end();
 		timer.showSpeed();
+		FileUtils.writeLineToFile(logPath, "共切 "+timer.getPdfCount()+" 本书", true);
+		FileUtils.writeLineToFile(logPath, "共切 "+timer.getPageCount()+" 页", true);
+		java.text.DecimalFormat df = new java.text.DecimalFormat("#");
+		FileUtils.writeLineToFile(logPath, "共耗 "+df.format(Math.floor((double)timer.getElapsedTimeInSeconds()/(double)60))+" 分钟", true);
+		FileUtils.writeLineToFile(logPath, "平均每100页耗时 "+df.format(timer.getElapsedTimeInSeconds()/(double)timer.getPageCount()*100)+" 秒", true);
+		FileUtils.writeLineToFile(logPath, "-----切PDF白边  结束时间："+ DateUtils.getFormatTime() +"-----", true);
 	}
 	
 	/**
@@ -692,6 +703,7 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException, MessagingException {		
 		try{
 			boolean demo= Boolean.parseBoolean(Prop.get("demo.flag"));
+			demo = true;
 			String foxitAppPath = Prop.get("foxit.path");
 			String foxitAppName = Prop.get("foxit.appname");
 			boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));

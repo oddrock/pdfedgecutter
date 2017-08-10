@@ -1,9 +1,13 @@
 package com.oddrock.common.file;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.util.Date;
 
 public class FileUtils {
 	/**
@@ -133,13 +137,39 @@ public class FileUtils {
 		}  
 	}
 	
+	public static void writeToFile(String filePath, String conent, boolean append) {     
+        BufferedWriter out = null;     
+        try {     
+            out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(filePath, append)));     
+            out.write(conent);     
+        } catch (Exception e) {     
+            e.printStackTrace();     
+        } finally {     
+            try {     
+                if(out != null){  
+                    out.close();     
+                }  
+            } catch (IOException e) {     
+                e.printStackTrace();     
+            }     
+        }     
+    }  
+	
+	public static void writeLineToFile(String filePath, String conent, boolean append) {     
+		writeToFile(filePath, conent+"\n", append);
+	}
+	
+	
 	public static void main(String[] args){
-		String filePath = "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf";
+		/*String filePath = "C:\\Users\\oddro\\Desktop\\Hadoop权威指南第三版(英文).pdf";
 		System.out.println(getFileNameWithoutSuffixFromFilePath(filePath));
 		System.out.println(getFileNameSuffix(filePath));
 		System.out.println(getFileNameFromFilePath(filePath));
 		System.out.println(getDirPathFromFilePath(filePath));
 		System.out.println(renameFileByAdd(filePath, "323"));
-		System.out.println(renameFileByAdd(filePath, "C:\\","323"));
+		System.out.println(renameFileByAdd(filePath, "C:\\","323"));*/
+		writeToFile("C:\\Users\\oddro\\Desktop\\test.log", "123\n", false);
+		writeToFile("C:\\Users\\oddro\\Desktop\\test.log", "456\n", false);
+		writeToFile("C:\\Users\\oddro\\Desktop\\test.log", new Date()+"\n", true);
 	}
 }
