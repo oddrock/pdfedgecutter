@@ -56,8 +56,8 @@ public class PdfEdgeCutter {
 	private int scY;
 	private int scWidth;
 	private int scHeight;
-	private String foxitAppPath = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
-	private String foxitAppName = "Foxit Phantom.exe";
+	private String foxitAppPath;
+	private String foxitAppName;
 	
 	public PdfEdgeCutter(boolean needEscKey, String foxitAppPath, String foxitAppName, int... scParams) throws AWTException, NativeHookException{
 		robotMngr = new RobotManager();
@@ -68,17 +68,10 @@ public class PdfEdgeCutter {
 		}
 		this.foxitAppPath = foxitAppPath;
 		this.foxitAppName = foxitAppName;
-		if(scParams.length>=4){
-			scX = scParams[0];
-			scY = scParams[1];
-			scWidth = scParams[2];
-			scHeight = scParams[3];
-		}else{
-			scX = 902;
-			scY = 258;
-			scWidth = 396;
-			scHeight = 441;
-		}
+		scX = scParams[0];
+		scY = scParams[1];
+		scWidth = scParams[2];
+		scHeight = scParams[3];
 	}
 
 	/**
