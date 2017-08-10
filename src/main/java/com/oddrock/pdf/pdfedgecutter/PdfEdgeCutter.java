@@ -55,6 +55,7 @@ public class PdfEdgeCutter {
 	private int scHeight;
 	private String foxitAppPath;
 	private String foxitAppName;
+	private int delay_aftersavepdf;
 	
 	public PdfEdgeCutter(boolean needEscKey, String foxitAppPath, String foxitAppName, int... scParams) throws AWTException, NativeHookException{
 		robotMngr = new RobotManager();
@@ -74,6 +75,7 @@ public class PdfEdgeCutter {
 		delay_afteropenpdf = Integer.parseInt(Prop.get("delay.afteropenpdf"));
 		delay_middle = Integer.parseInt(Prop.get("delay.middle"));
 		delay_min = Integer.parseInt(Prop.get("delay.min"));
+		delay_aftersavepdf = Integer.parseInt(Prop.get("delay.aftersavepdf"));
 		demo_pagecount = Integer.parseInt(Prop.get("demo.pagecount"));
 		threshold_badpnt_proportion = Double.parseDouble(Prop.get("threshold.badpnt.proportion"));
 		threshold_whiteline_proportion = Double.parseDouble(Prop.get("threshold.whiteline.proportion"));
@@ -590,7 +592,7 @@ public class PdfEdgeCutter {
 		FileUtils.mkdirIfNotExists(dirPath);
 		String destFilePath = dirPath + java.io.File.separator+fileName;
 		saveFoxitPdf(destFilePath);
-		robotMngr.delay(delay_afteropenpdf);
+		robotMngr.delay(delay_aftersavepdf);
 		exitFoxitPdf();
 		logger.warn("切白边完成，【源文件】"+pdfFilePath+"，【目标文件】"+destFilePath);
 		timer.showSpeedPer100Pages();
@@ -608,7 +610,7 @@ public class PdfEdgeCutter {
 	 */
 	public void cutWhiteEdgeBatch(String pdfDirPath, 
 			boolean renameFlag, String addstr, 
-			boolean newDirFlag, String newDirPath) throws AWTException, IOException{
+			boolean newDirFlag, String newDirPath, boolean demo) throws AWTException, IOException{
 		PdfEdgeCutTimer timer = new PdfEdgeCutTimer();
 		timer.start();
 		File srcDir = new File(pdfDirPath);
@@ -619,9 +621,12 @@ public class PdfEdgeCutter {
 		for (File file : files) {
 			if(file.isFile()){
 				if(FileUtils.getFileNameSuffix(file.getName()).equalsIgnoreCase("pdf")){
-					cutWhiteEdge(file.getAbsolutePath(), renameFlag, addstr, newDirFlag, newDirPath, false);
+					cutWhiteEdge(file.getAbsolutePath(), renameFlag, addstr, newDirFlag, newDirPath, demo);
 					timer.countPdf();
 					timer.countPages(new PdfManager().pdfPageCount(file.getAbsolutePath()));
+					if(demo){
+						break;
+					}
 				}
 			}   
         }
@@ -685,22 +690,35 @@ public class PdfEdgeCutter {
 	}
 	
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException, MessagingException {		
-		String foxitAppPath = Prop.get("foxit.path");
-		String foxitAppName = Prop.get("foxit.appname");
-		boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));
-		String srcDirPath = Prop.get("srcpath");
-		String dstDirPath = Prop.get("newdir.dstpath");
-		String apendName = Prop.get("rename.appendname");
-		boolean rename = Boolean.parseBoolean(Prop.get("rename.flag"));
-		boolean newdir = Boolean.parseBoolean(Prop.get("newdir.flag"));
-		int scX = Integer.parseInt(Prop.get("foxit.coordinate.scx"));
-		int scY = Integer.parseInt(Prop.get("foxit.coordinate.scy"));
-		int scWidth = Integer.parseInt(Prop.get("foxit.coordinate.width"));
-		int scHeight = Integer.parseInt(Prop.get("foxit.coordinate.height"));
-		int adjuststeplength = Integer.parseInt(Prop.get("adjuststeplength"));
-		PdfEdgeCutter cutter = new PdfEdgeCutter(needEscKey, foxitAppPath, foxitAppName, scX, scY, scWidth, scHeight,adjuststeplength);
-		cutter.cutWhiteEdgeBatch(srcDirPath, rename, apendName, newdir, dstDirPath);
-		cutter.sendSMS("所有PDF切白边已完成！！！");
+		try{
+			boolean demo= Boolean.parseBoolean(Prop.get("demo.flag"));
+			demo = true;
+			String foxitAppPath = Prop.get("foxit.path");
+			String foxitAppName = Prop.get("foxit.appname");
+			boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));
+			String srcDirPath = Prop.get("srcpath");
+			String dstDirPath = Prop.get("newdir.dstpath");
+			String apendName = Prop.get("rename.appendname");
+			boolean rename = Boolean.parseBoolean(Prop.get("rename.flag"));
+			boolean newdir = Boolean.parseBoolean(Prop.get("newdir.flag"));
+			int scX = Integer.parseInt(Prop.get("foxit.coordinate.scx"));
+			int scY = Integer.parseInt(Prop.get("foxit.coordinate.scy"));
+			int scWidth = Integer.parseInt(Prop.get("foxit.coordinate.width"));
+			int scHeight = Integer.parseInt(Prop.get("foxit.coordinate.height"));
+			int adjuststeplength = Integer.parseInt(Prop.get("adjuststeplength"));
+			if(args.length>0){
+				demo = Boolean.parseBoolean(args[0]);
+			}
+			PdfEdgeCutter cutter = new PdfEdgeCutter(needEscKey, foxitAppPath, foxitAppName, scX, scY, scWidth, scHeight,adjuststeplength);
+			cutter.cutWhiteEdgeBatch(srcDirPath, rename, apendName, newdir, dstDirPath, demo);
+			cutter.sendSMS("所有PDF切白边已完成！！！");
+		}catch(Exception e){
+			e.printStackTrace();
+		}finally{
+			System.exit(0);
+		}
+		
+		
 		
 		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\123.pdf", 
 				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);*/
@@ -721,6 +739,6 @@ public class PdfEdgeCutter {
 		cutter.robotMngr.delay(MIN_DELAY);
 		cutter.getCurrentPageSize();*/
 		
-		System.exit(0);
+		
 	}
 }
