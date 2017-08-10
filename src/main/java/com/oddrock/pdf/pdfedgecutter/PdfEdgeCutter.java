@@ -692,7 +692,6 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException, MessagingException {		
 		try{
 			boolean demo= Boolean.parseBoolean(Prop.get("demo.flag"));
-			demo = true;
 			String foxitAppPath = Prop.get("foxit.path");
 			String foxitAppName = Prop.get("foxit.appname");
 			boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));
