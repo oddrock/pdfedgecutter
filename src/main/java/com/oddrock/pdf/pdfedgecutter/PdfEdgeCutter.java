@@ -622,12 +622,19 @@ public class PdfEdgeCutter {
 			return;
 		}
 		File[] files = srcDir.listFiles();
+		int tempCount = 0;
+		PdfManager pm = new PdfManager();
 		for (File file : files) {
 			if(file.isFile()){
 				if(FileUtils.getFileNameSuffix(file.getName()).equalsIgnoreCase("pdf")){
 					cutWhiteEdge(file.getAbsolutePath(), renameFlag, addstr, newDirFlag, newDirPath, demo);
 					timer.countPdf();
-					timer.countPages(new PdfManager().pdfPageCount(file.getAbsolutePath()));
+					tempCount = pm.pdfPageCount(file.getAbsolutePath());
+					if(demo && tempCount>=50){
+						timer.countPages(50);
+					}else{
+						timer.countPages(tempCount);
+					}
 					FileUtils.writeLineToFile(logPath, "完成："+file.getName(), true);
 					if(demo){
 						break;
@@ -703,7 +710,7 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException, MessagingException {		
 		try{
 			boolean demo= Boolean.parseBoolean(Prop.get("demo.flag"));
-			demo = true;
+			//demo = true;
 			String foxitAppPath = Prop.get("foxit.path");
 			String foxitAppName = Prop.get("foxit.appname");
 			boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));
