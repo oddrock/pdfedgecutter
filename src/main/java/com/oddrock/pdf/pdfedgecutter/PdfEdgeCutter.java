@@ -1,21 +1,30 @@
 package com.oddrock.pdf.pdfedgecutter;
 
 import com.oddrock.common.windows.GlobalKeyListener;
+
 import org.jnativehook.GlobalScreen;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+
 import com.oddrock.common.awt.RobotManager;
+import com.oddrock.common.email.EmailManager;
 import com.oddrock.common.file.FileUtils;
 import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.pdf.PdfSize;
 import com.oddrock.common.windows.ClipboardUtils;
 import com.oddrock.common.windows.CmdExecutor;
 import com.oddrock.common.windows.CmdResult;
+
 import java.awt.AWTException;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
+
 import javax.imageio.ImageIO;
+import javax.mail.MessagingException;
+
 import org.apache.log4j.Logger;
 import org.jnativehook.NativeHookException;
 
@@ -667,60 +676,30 @@ public class PdfEdgeCutter {
 		return result;
 	}
 	
-	public static void main(String[] args) throws IOException, AWTException, NativeHookException {		
-		
-		String foxitAppPath = "C:\\Program Files (x86)\\Foxit Software\\Foxit Phantom\\Foxit Phantom.exe";
-		String foxitAppName = "Foxit Phantom.exe";
-		boolean needEscKey = true;
-		String srcDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
-		String dstDirPath = "C:\\Users\\oddro\\Desktop\\qiebaibian";
-		String apendName = "_切白边";
-		int scX = 902;
-		int scY = 258;
-		int scWidth = 396;
-		int scHeight = 441;
-		int i = 0;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			foxitAppPath = args[i];
-		}
-		i++;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			foxitAppName = args[i];
-		}
-		i++;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			needEscKey = Boolean.valueOf(args[i]);
-		}
-		i++;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			srcDirPath = args[i];
-		}
-		i++;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			dstDirPath = args[i];
-		}
-		i++;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			apendName = args[i];
-		}
-		i++;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			scX = Integer.valueOf(args[i]);
-		}
-		i++;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			scY = Integer.valueOf(args[i]);
-		}
-		i++;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			scWidth = Integer.valueOf(args[i]);
-		}
-		i++;
-		if(args.length>=(i+1) && !args[i].trim().equals("-")){
-			scHeight = Integer.valueOf(args[i]);
-		}
+	public void sendSMS(String content) throws UnsupportedEncodingException, MessagingException{
+		String senderAccount = Prop.get("mail.sender.account");
+		String senderPasswd = Prop.get("mail.sender.passwd");
+		String recverAccounts = Prop.get("mail.recver.accounts");
+		EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
+	}
+	
+	public static void main(String[] args) throws IOException, AWTException, NativeHookException, MessagingException {		
+		System.out.println();
+		String foxitAppPath = Prop.get("foxit.path");
+		String foxitAppName = Prop.get("foxit.appname");
+		boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));
+		String srcDirPath = Prop.get("srcpath");
+		String dstDirPath = Prop.get("newdir.dstpath");
+		String apendName = Prop.get("rename.appendname");
+		boolean rename = Boolean.parseBoolean(Prop.get("rename.flag"));
+		boolean newdir = Boolean.parseBoolean(Prop.get("newdir.flag"));
+		int scX = Integer.parseInt(Prop.get("foxit.coordinate.scx"));
+		int scY = Integer.parseInt(Prop.get("foxit.coordinate.scy"));
+		int scWidth = Integer.parseInt(Prop.get("foxit.coordinate.width"));
+		int scHeight = Integer.parseInt(Prop.get("foxit.coordinate.height"));
 		PdfEdgeCutter cutter = new PdfEdgeCutter(needEscKey, foxitAppPath, foxitAppName, scX, scY, scWidth, scHeight);
-		cutter.cutWhiteEdgeBatch(srcDirPath, true, apendName, true, dstDirPath);
+		cutter.cutWhiteEdgeBatch(srcDirPath, rename, apendName, newdir, dstDirPath);
+		cutter.sendSMS("所有PDF切白边已完成！！！");
 		
 		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\123.pdf", 
 				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);*/

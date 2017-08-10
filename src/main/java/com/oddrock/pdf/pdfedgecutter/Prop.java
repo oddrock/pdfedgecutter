@@ -9,7 +9,6 @@ public class Prop {
 	}
 	
 	private static void load(){
-		PR.addFilePath("pdfedgecutter-secret.properties");
 		PR.addFilePath("pdfedgecutter.properties");
 		PR.loadProperties();
 	}
