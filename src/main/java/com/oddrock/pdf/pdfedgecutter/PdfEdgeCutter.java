@@ -682,7 +682,7 @@ public class PdfEdgeCutter {
 		return result;
 	}
 	
-	public void sendSMS(String content) throws UnsupportedEncodingException, MessagingException{
+	public void sendMail(String content) throws UnsupportedEncodingException, MessagingException{
 		String senderAccount = Prop.get("mail.sender.account");
 		String senderPasswd = Prop.get("mail.sender.passwd");
 		String recverAccounts = Prop.get("mail.recver.accounts");
@@ -710,34 +710,11 @@ public class PdfEdgeCutter {
 			}
 			PdfEdgeCutter cutter = new PdfEdgeCutter(needEscKey, foxitAppPath, foxitAppName, scX, scY, scWidth, scHeight,adjuststeplength);
 			cutter.cutWhiteEdgeBatch(srcDirPath, rename, apendName, newdir, dstDirPath, demo);
-			cutter.sendSMS("所有PDF切白边已完成！！！");
+			cutter.sendMail("所有PDF切白边已完成！！！");
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
 			System.exit(0);
-		}
-		
-		
-		
-		/*cutter.cutWhiteEdge("C:\\Users\\oddro\\Desktop\\pdf测试\\123.pdf", 
-				true, "_切白边", true, "C:\\Users\\oddro\\Desktop\\qiebaibian", true);*/
-
-		//String pdfDirPath = "C:\\Users\\oddro\\Desktop\\pdf测试";
-		
-		
-		//cutter.simCutEdgeOnePage("C:\\Users\\oddro\\Desktop\\pdf测试\\启示录 打造用户喜爱的产品.pdf", 11);
-		/*for(int i = 45; i< 66; i++)
-			cutter.isWhiteVerticalLine("C:\\Users\\oddro\\Desktop\\pdf测试\\结网_切白边.pdf", 2, i);*/
-		
-		/*String pdfFilePath = "C:\\Users\\oddro\\Desktop\\pdf测试\\产品策划-精益求精：卓越的互联网产品设计与管理.pdf";
-		cutter.closeFoxit(FOXIT_APP_NAME);
-		cutter.robotMngr.delay(MIDDLE_DELAY);
-		cutter.openPdfByFoxit(FOXIT_APP_PATH, pdfFilePath);
-		cutter.robotMngr.delay(DELAY_AFTER_OPEN_PDF);
-		cutter.preCutPages();
-		cutter.robotMngr.delay(MIN_DELAY);
-		cutter.getCurrentPageSize();*/
-		
-		
+		}		
 	}
 }
