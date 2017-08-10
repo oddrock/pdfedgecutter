@@ -30,26 +30,23 @@ import org.jnativehook.NativeHookException;
 
 public class PdfEdgeCutter {
 	private static Logger logger = Logger.getLogger(PdfEdgeCutter.class);
-	@SuppressWarnings("unused")
-	private static final String KANKAN_APP_NAME = "KanKan.exe";
 	
 	// 认定像素点为白色时的R/G/B最小值
-	private static final int MIN_R = 230;
-	private static final int MIN_G = 230;
-	private static final int MIN_B = 230;
+	private static int threshold_whitepnt_rmin;
+	private static int threshold_whitepnt_gmin;
+	private static int threshold_whitepnt_bmin;
 
-	private static final double BAD_PNT_PROPORTION_THRESHOLD = 0.01;
-	private static final double WHITELINE_PROPORTION = 0.8;
+	private double threshold_badpnt_proportion;
+	private double threshold_whiteline_proportion;
 
-	private static final int DEALY_JUMP_NEXT_PAGE = 800;
-	private static final int DELAY_AFTER_OPEN_PDF = 2000;
-	private static final int MIDDLE_DELAY = 300;
-	private static final int MIN_DELAY = 100;
-	private static final int DEMO_PAGE_COUNT = 20;
+	private int delay_beforejumpnextpage;
+	private int delay_afteropenpdf;
+	private int delay_middle;
+	private int delay_min;
+	private int demo_pagecount;
 	
 	// 调整步长，每几个像素做一条线测试是否是白边
-	private static final int AJDUST_STEP_LENGTH = 1;
-	
+	private int ajdust_step_length;
 	private RobotManager robotMngr;
 	private PdfManager pdfMngr;
 	private int scX;
@@ -72,6 +69,17 @@ public class PdfEdgeCutter {
 		scY = scParams[1];
 		scWidth = scParams[2];
 		scHeight = scParams[3];
+		ajdust_step_length = scParams[4];
+		delay_beforejumpnextpage = Integer.parseInt(Prop.get("delay.beforejumpnextpage"));
+		delay_afteropenpdf = Integer.parseInt(Prop.get("delay.afteropenpdf"));
+		delay_middle = Integer.parseInt(Prop.get("delay.middle"));
+		delay_min = Integer.parseInt(Prop.get("delay.min"));
+		demo_pagecount = Integer.parseInt(Prop.get("demo.pagecount"));
+		threshold_badpnt_proportion = Double.parseDouble(Prop.get("threshold.badpnt.proportion"));
+		threshold_whiteline_proportion = Double.parseDouble(Prop.get("threshold.whiteline.proportion"));
+		threshold_whitepnt_rmin = Integer.parseInt(Prop.get("threshold.whitepnt.rmin"));
+		threshold_whitepnt_gmin = Integer.parseInt(Prop.get("threshold.whitepnt.gmin"));
+		threshold_whitepnt_bmin = Integer.parseInt(Prop.get("threshold.whitepnt.bmin"));
 	}
 
 	/**
@@ -111,7 +119,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void zoom2SuitablePage() throws AWTException {
-		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.delay(delay_afteropenpdf);
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_2);
 	}
 	
@@ -125,7 +133,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void zoom2SuitableWidth() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(delay_min);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_Z);
 		robotMngr.pressKey(KeyEvent.VK_W);
@@ -137,7 +145,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void singlePage() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(delay_min);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_P);
 		robotMngr.pressKey(KeyEvent.VK_S);
@@ -149,7 +157,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void conitnuousPage() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(delay_min);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_P);
 		robotMngr.pressKey(KeyEvent.VK_C);
@@ -161,7 +169,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void jumpFirstPage() throws AWTException {
-		robotMngr.delay(DEALY_JUMP_NEXT_PAGE);
+		robotMngr.delay(delay_beforejumpnextpage);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_G);
 		robotMngr.pressKey(KeyEvent.VK_F);
@@ -173,7 +181,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void jumpNextPage() throws AWTException {
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(delay_min);
 		robotMngr.pressRight();
 	}
 
@@ -183,13 +191,13 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void jumpSpecPage(int pageNum) throws AWTException {
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(delay_min);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_V);
 		robotMngr.pressKey(KeyEvent.VK_G);
 		robotMngr.pressKey(KeyEvent.VK_A);
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(delay_min);
 		robotMngr.pressContinuousKey(String.valueOf(pageNum));
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(delay_min);
 		robotMngr.pressEnter();
 	}
 	
@@ -199,7 +207,7 @@ public class PdfEdgeCutter {
 	 * @throws AWTException
 	 */
 	private void startCutPage() throws AWTException {
-		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.delay(delay_middle);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_O);
 		robotMngr.pressKey(KeyEvent.VK_C);
 	}
@@ -231,7 +239,7 @@ public class PdfEdgeCutter {
 	 * @return
 	 */
 	private BufferedImage screenCaptureCutPage(){
-		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.delay(delay_middle);
 		return robotMngr.createScreenCapture(new Rectangle(
 				//Toolkit.getDefaultToolkit().getScreenSize()
 				scX,
@@ -254,7 +262,7 @@ public class PdfEdgeCutter {
 		int R =(RGB & 0xff0000 ) >> 16 ;
 		int G= (RGB & 0xff00 ) >> 8 ;
 		int B= (RGB & 0xff );
-		if(R>=MIN_R && G>=MIN_G && B>=MIN_B){
+		if(R>=threshold_whitepnt_rmin && G>=threshold_whitepnt_gmin && B>=threshold_whitepnt_bmin){
 			flag = true;
 		}
 		return flag;
@@ -286,12 +294,12 @@ public class PdfEdgeCutter {
 					curLineStartY = y;
 				}
 			}
-			if(((double)(curLineEndY-curLineStartY)/(double)height)>=WHITELINE_PROPORTION 
-					&& ((double)badPointCount/(double)(curLineEndY-curLineStartY))<=BAD_PNT_PROPORTION_THRESHOLD){
+			if(((double)(curLineEndY-curLineStartY)/(double)height)>=threshold_whiteline_proportion 
+					&& ((double)badPointCount/(double)(curLineEndY-curLineStartY))<=threshold_badpnt_proportion){
 				return true;
 			}
 			if(!isWhitePoint(image, x ,y) && curLineStartY>0){
-				if(curLineEndY>0 && ((double)badPointCount/(double)(curLineEndY-curLineStartY))>BAD_PNT_PROPORTION_THRESHOLD){
+				if(curLineEndY>0 && ((double)badPointCount/(double)(curLineEndY-curLineStartY))>threshold_badpnt_proportion){
 					curLineEndY = -1;
 					curLineStartY = -1;
 					badPointCount = 0;
@@ -309,7 +317,7 @@ public class PdfEdgeCutter {
 	 * @return
 	 */
 	private int whiteMarginOutterLeftX(BufferedImage image){
-		for(int x=1; x<image.getWidth()/3; x=x+AJDUST_STEP_LENGTH){
+		for(int x=1; x<image.getWidth()/3; x=x+ajdust_step_length){
 			if(isWhiteVerticalLine(image, x)){
 				return x;
 			}
@@ -328,7 +336,7 @@ public class PdfEdgeCutter {
 			return -1;
 		}
 		int value = -1;
-		for(int x=whiteMarginOutterLeftX; x<image.getWidth()/3; x=x+AJDUST_STEP_LENGTH){
+		for(int x=whiteMarginOutterLeftX; x<image.getWidth()/3; x=x+ajdust_step_length){
 			if(isWhiteVerticalLine(image, x)){
 				value = x;
 			}else{
@@ -344,7 +352,7 @@ public class PdfEdgeCutter {
 	 * @return
 	 */
 	private int whiteMarginOutterRightX(BufferedImage image){
-		for(int x=image.getWidth()-AJDUST_STEP_LENGTH; x>=image.getWidth()/3*2; x=x-AJDUST_STEP_LENGTH){
+		for(int x=image.getWidth()-ajdust_step_length; x>=image.getWidth()/3*2; x=x-ajdust_step_length){
 			if(isWhiteVerticalLine(image, x)){
 				return x;
 			}
@@ -363,7 +371,7 @@ public class PdfEdgeCutter {
 			return -1;
 		}
 		int value = -1;
-		for(int x=whiteMarginOutterRightX; x>=image.getWidth()/3*2; x=x-AJDUST_STEP_LENGTH){
+		for(int x=whiteMarginOutterRightX; x>=image.getWidth()/3*2; x=x-ajdust_step_length){
 			if(isWhiteVerticalLine(image, x)){
 				value = x;
 			}else{
@@ -386,12 +394,12 @@ public class PdfEdgeCutter {
 					curLineStartX = x;
 				}
 			}
-			if(((double)badPointCount/(double)(curLineEndX-curLineStartX))<=BAD_PNT_PROPORTION_THRESHOLD
-					&& ((double)(curLineEndX-curLineStartX)/(double)width)>=WHITELINE_PROPORTION){
+			if(((double)badPointCount/(double)(curLineEndX-curLineStartX))<=threshold_badpnt_proportion
+					&& ((double)(curLineEndX-curLineStartX)/(double)width)>=threshold_whiteline_proportion){
 				return true;
 			}
 			if(!isWhitePoint(image, x ,y) && curLineStartX>0){
-				if(curLineEndX>0 && ((double)badPointCount/(double)(curLineEndX-curLineStartX))>BAD_PNT_PROPORTION_THRESHOLD){
+				if(curLineEndX>0 && ((double)badPointCount/(double)(curLineEndX-curLineStartX))>threshold_badpnt_proportion){
 					curLineEndX = -1;
 					curLineStartX = -1;
 					badPointCount = 0;
@@ -407,7 +415,7 @@ public class PdfEdgeCutter {
 	}
 
 	private int whiteMarginOutterTopY(BufferedImage image){
-		for(int y=1; y<image.getHeight()/3; y=y+AJDUST_STEP_LENGTH){
+		for(int y=1; y<image.getHeight()/3; y=y+ajdust_step_length){
 			if(isWhiteHorizontalLine(image, y)){
 				return y;
 			}
@@ -421,7 +429,7 @@ public class PdfEdgeCutter {
 			return -1;
 		}
 		int value = -1;
-		for(int y=whiteMarginOutterTopY; y<image.getHeight()/3; y=y+AJDUST_STEP_LENGTH){
+		for(int y=whiteMarginOutterTopY; y<image.getHeight()/3; y=y+ajdust_step_length){
 			if(isWhiteHorizontalLine(image, y)){
 				value = y;
 			}else{
@@ -433,7 +441,7 @@ public class PdfEdgeCutter {
 	
 
 	private int whiteMarginOutterBottomY(BufferedImage image){
-		for(int y=image.getHeight()-AJDUST_STEP_LENGTH; y>=image.getHeight()/3*2; y=y-AJDUST_STEP_LENGTH){
+		for(int y=image.getHeight()-ajdust_step_length; y>=image.getHeight()/3*2; y=y-ajdust_step_length){
 			if(isWhiteHorizontalLine(image, y)){
 				return y;
 			}
@@ -447,7 +455,7 @@ public class PdfEdgeCutter {
 			return -1;
 		}
 		int value = -1;
-		for(int y=whiteMarginOutterBottomY; y>=image.getHeight()/3*2; y=y-AJDUST_STEP_LENGTH){
+		for(int y=whiteMarginOutterBottomY; y>=image.getHeight()/3*2; y=y-ajdust_step_length){
 			if(isWhiteHorizontalLine(image, y)){
 				value = y;
 			}else{
@@ -493,7 +501,7 @@ public class PdfEdgeCutter {
 		if(Math.floor(right_margin*10)>0){
 			ajustSize((int)Math.floor(right_margin*10));
 		}
-		robotMngr.delay(MIN_DELAY);
+		robotMngr.delay(delay_min);
 		if(realOpt.length==0 || realOpt[0]!=false){
 			robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_K);	
 			robotMngr.pressEnter();	
@@ -537,7 +545,7 @@ public class PdfEdgeCutter {
 		PdfEdgeCutTimer timer = new PdfEdgeCutTimer();
 		timer.start();
 		closeFoxit(foxitAppName);
-		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.delay(delay_middle);
 		robotMngr.moveMouseToRightDownCorner();
 		File file = new File(pdfFilePath);
 		if(!file.exists() && !file.isFile()){
@@ -553,10 +561,10 @@ public class PdfEdgeCutter {
 		int pageCount = new PdfManager().pdfPageCount(pdfFilePath);
 		int endPageNum = pageCount;
 		if(demoFlag){
-			if(pageCount<=DEMO_PAGE_COUNT){
+			if(pageCount<=demo_pagecount){
 				endPageNum = pageCount/4;
 			}else{
-				endPageNum = DEMO_PAGE_COUNT;
+				endPageNum = demo_pagecount;
 			}
 		}
 		for(int i=1;i<=endPageNum;i++){
@@ -582,7 +590,7 @@ public class PdfEdgeCutter {
 		FileUtils.mkdirIfNotExists(dirPath);
 		String destFilePath = dirPath + java.io.File.separator+fileName;
 		saveFoxitPdf(destFilePath);
-		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.delay(delay_afteropenpdf);
 		exitFoxitPdf();
 		logger.warn("切白边完成，【源文件】"+pdfFilePath+"，【目标文件】"+destFilePath);
 		timer.showSpeedPer100Pages();
@@ -627,15 +635,15 @@ public class PdfEdgeCutter {
 	 */
 	private void saveFoxitPdf(String destFilePath){
 		ClipboardUtils.setSysClipboardText(destFilePath);
-		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.delay(delay_afteropenpdf);
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_SHIFT, KeyEvent.VK_S);
-		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.delay(delay_afteropenpdf);
 		robotMngr.pressCombinationKey(KeyEvent.VK_CONTROL, KeyEvent.VK_V);
-		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.delay(delay_afteropenpdf);
 		robotMngr.pressCombinationKey(KeyEvent.VK_ALT, KeyEvent.VK_S);
-		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.delay(delay_afteropenpdf);
 		robotMngr.pressKey(KeyEvent.VK_Y);
-		robotMngr.delay(DELAY_AFTER_OPEN_PDF);
+		robotMngr.delay(delay_afteropenpdf);
 		robotMngr.pressEnter();
 	}
 	
@@ -648,7 +656,7 @@ public class PdfEdgeCutter {
 	 */
 	public void simCutEdgeOnePage(String pdfFilePath, int pageNum) throws AWTException, IOException{
 		closeFoxit(foxitAppName);
-		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.delay(delay_middle);
 		openPdfByFoxit(foxitAppPath, pdfFilePath);
 		preCutPages();
 		jumpSpecPage(pageNum);
@@ -658,7 +666,7 @@ public class PdfEdgeCutter {
 	
 	public boolean isWhiteVerticalLine(String pdfFilePath, int pageNum, int x) throws AWTException{
 		closeFoxit(foxitAppName);
-		robotMngr.delay(MIDDLE_DELAY);
+		robotMngr.delay(delay_middle);
 		openPdfByFoxit(foxitAppPath, pdfFilePath);
 		preCutPages();
 		jumpSpecPage(pageNum);
@@ -689,7 +697,8 @@ public class PdfEdgeCutter {
 		int scY = Integer.parseInt(Prop.get("foxit.coordinate.scy"));
 		int scWidth = Integer.parseInt(Prop.get("foxit.coordinate.width"));
 		int scHeight = Integer.parseInt(Prop.get("foxit.coordinate.height"));
-		PdfEdgeCutter cutter = new PdfEdgeCutter(needEscKey, foxitAppPath, foxitAppName, scX, scY, scWidth, scHeight);
+		int adjuststeplength = Integer.parseInt(Prop.get("adjuststeplength"));
+		PdfEdgeCutter cutter = new PdfEdgeCutter(needEscKey, foxitAppPath, foxitAppName, scX, scY, scWidth, scHeight,adjuststeplength);
 		cutter.cutWhiteEdgeBatch(srcDirPath, rename, apendName, newdir, dstDirPath);
 		cutter.sendSMS("所有PDF切白边已完成！！！");
 		
