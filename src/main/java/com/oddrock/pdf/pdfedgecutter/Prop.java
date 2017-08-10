@@ -2,7 +2,7 @@ package com.oddrock.pdf.pdfedgecutter;
 
 import com.oddrock.common.prop.PropertiesReader;
 
-public class PropertiesManager {
+public class Prop {
 	private static final PropertiesReader PR = new PropertiesReader();
 	static{
 		load();
@@ -14,11 +14,11 @@ public class PropertiesManager {
 		PR.loadProperties();
 	}
 	
-	public static String getValue(String key){
+	public static String get(String key){
 		return PR.getValue(key);
 	}
 	
-	public static String getValue(String key, String defaultValue) {
+	public static String get(String key, String defaultValue) {
 		return PR.getValue(key, defaultValue);
 	}
 }
