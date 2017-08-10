@@ -7,6 +7,7 @@ import javax.mail.MessagingException;
 import org.apache.log4j.Logger;
 
 import com.oddrock.common.email.EmailManager;
+import com.oddrock.common.prop.PropertiesReader;
 
 public class PdfEdgeCutTimer {
 	private static Logger logger = Logger.getLogger(PdfEdgeCutTimer.class);
@@ -65,10 +66,11 @@ public class PdfEdgeCutTimer {
 	}
 	
 	public static void main(String[] args) throws UnsupportedEncodingException, MessagingException {
-		String senderAccount = PropertiesManager.getValue("mail.sender.account");
-		String senderPasswd = PropertiesManager.getValue("mail.sender.passwd");
-		String recverAccounts = PropertiesManager.getValue("mail.recver.accounts");
-		EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, "测试短信：PDF切白边已完成004");
+		PropertiesReader pr = new PropertiesReader("pdfedgecutter-secret.properties", "pdfedgecutter.properties");
+		String senderAccount = pr.getValue("mail.sender.account");
+		String senderPasswd = pr.getValue("mail.sender.passwd");
+		String recverAccounts = pr.getValue("mail.recver.accounts");
+		EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, "测试短信：PDF切白边已完成005");
 	}
 
 }

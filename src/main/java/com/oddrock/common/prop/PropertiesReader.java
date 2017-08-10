@@ -11,6 +11,24 @@ import java.util.Set;
 public class PropertiesReader {
 	private Properties properties = new Properties();
 	private Set<String> filePathSet = new HashSet<String>(); 
+	
+	public PropertiesReader(){
+		super();
+	}
+	
+	public PropertiesReader(String filePath){
+		super();
+		this.addFilePath(filePath);
+		this.loadProperties();
+	}
+	
+	public PropertiesReader(String... filePaths){
+		super();
+		for(String filePath : filePaths){
+			this.addFilePath(filePath);
+		}
+		this.loadProperties();
+	}
 
 	public void addFilePath(String filePath) {
 		if(filePath!=null && !"".equals(filePath.trim())){
