@@ -1,6 +1,12 @@
 package com.oddrock.pdf.pdfedgecutter;
 
+import java.io.UnsupportedEncodingException;
+
+import javax.mail.MessagingException;
+
 import org.apache.log4j.Logger;
+
+import com.oddrock.common.email.EmailManager;
 
 public class PdfEdgeCutTimer {
 	private static Logger logger = Logger.getLogger(PdfEdgeCutTimer.class);
@@ -58,7 +64,11 @@ public class PdfEdgeCutTimer {
 		logger.warn(message);
 	}
 	
-	public static void main(String[] args) {
+	public static void main(String[] args) throws UnsupportedEncodingException, MessagingException {
+		String senderAccount = PropertiesManager.getValue("mail.sender.account");
+		String senderPasswd = PropertiesManager.getValue("mail.sender.passwd");
+		String recverAccounts = PropertiesManager.getValue("mail.recver.accounts");
+		EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, "测试短信：PDF切白边已完成004");
 	}
 
 }

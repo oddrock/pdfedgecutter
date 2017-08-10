@@ -3,3 +3,4 @@
 .classpath
 .project
 TODO.md
+/src/main/resources/pdfedgecutter-secret.properties
