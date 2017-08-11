@@ -59,6 +59,7 @@ public class PdfEdgeCutter {
 	private int delay_aftersavepdf;
 	private String logPath;
 	
+	
 	public PdfEdgeCutter(boolean needEscKey, String foxitAppPath, String foxitAppName, int... scParams) throws AWTException, NativeHookException{
 		robotMngr = new RobotManager();
 		pdfMngr = new PdfManager();
@@ -99,6 +100,15 @@ public class PdfEdgeCutter {
 	}
 	
 	/**
+	 * 使用notepad++打开结果
+	 * @return
+	 */
+	private CmdResult openCutResultByNotepadpp() {
+		return CmdExecutor.getSingleInstance().exeCmd(
+				Prop.get("notepadpp.path") + " \"" + Prop.get("log.path") + "\"");
+	}
+	
+	/**
 	 * 关闭foxit
 	 * @param foxitAppName
 	 * @return
@@ -106,6 +116,16 @@ public class PdfEdgeCutter {
 	private CmdResult closeFoxit(String foxitAppName) {
 		return CmdExecutor.getSingleInstance().exeCmd(
 				"taskkill /f /im \"" + foxitAppName + "\"");
+	}
+	
+	/**
+	 * 关闭foxit
+	 * @param foxitAppName
+	 * @return
+	 */
+	private CmdResult closeNotepadpp() {
+		return CmdExecutor.getSingleInstance().exeCmd(
+				"taskkill /f /im \"" + Prop.get("notepadpp.appname") + "\"");
 	}
 	
 	/**
@@ -615,6 +635,7 @@ public class PdfEdgeCutter {
 			boolean renameFlag, String addstr, 
 			boolean newDirFlag, String newDirPath, boolean demo) throws AWTException, IOException{
 		FileUtils.writeLineToFile(logPath, "-----切PDF白边  开始时间："+ DateUtils.getFormatTime() +"-----", false);
+		closeNotepadpp();
 		PdfEdgeCutTimer timer = new PdfEdgeCutTimer();
 		timer.start();
 		File srcDir = new File(pdfDirPath);
@@ -650,6 +671,7 @@ public class PdfEdgeCutter {
 		FileUtils.writeLineToFile(logPath, "共耗 "+df.format(Math.floor((double)timer.getElapsedTimeInSeconds()/(double)60))+" 分钟", true);
 		FileUtils.writeLineToFile(logPath, "平均每100页耗时 "+df.format(timer.getElapsedTimeInSeconds()/(double)timer.getPageCount()*100)+" 秒", true);
 		FileUtils.writeLineToFile(logPath, "-----切PDF白边  结束时间："+ DateUtils.getFormatTime() +"-----", true);
+		openCutResultByNotepadpp();
 	}
 	
 	/**
@@ -710,7 +732,7 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) throws IOException, AWTException, NativeHookException, MessagingException {		
 		try{
 			boolean demo= Boolean.parseBoolean(Prop.get("demo.flag"));
-			//demo = true;
+			demo = true;
 			String foxitAppPath = Prop.get("foxit.path");
 			String foxitAppName = Prop.get("foxit.appname");
 			boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));
