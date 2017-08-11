@@ -24,9 +24,9 @@ public class RobotManager {
 		return Toolkit.getDefaultToolkit().getScreenSize();
 	}
 	
-	public RobotManager moveMouseToRightDownCorner(){
+	public RobotManager moveMouseToRightDownCorner(int xgap, int ygap){
 		Dimension dimension = getScreenSize();
-		robot.mouseMove((int)dimension.getWidth(), (int)dimension.getHeight());
+		robot.mouseMove((int)dimension.getWidth()-xgap, (int)dimension.getHeight()-ygap);
 		return this;
 	}
 

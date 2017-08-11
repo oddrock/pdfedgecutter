@@ -571,7 +571,7 @@ public class PdfEdgeCutter {
 		timer.start();
 		closeFoxit(foxitAppName);
 		robotMngr.delay(delay_middle);
-		robotMngr.moveMouseToRightDownCorner();
+		robotMngr.moveMouseToRightDownCorner(Prop.getInt("xgap"),Prop.getInt("ygap"));
 		File file = new File(pdfFilePath);
 		if(!file.exists() && !file.isFile()){
 			logger.warn("文件【"+pdfFilePath+"】不存在");
@@ -709,7 +709,15 @@ public class PdfEdgeCutter {
 		cutCurrentPage(pdfSize.getPageWidthInch(pageNum), pdfSize.getPageHeightInch(pageNum),false);
 	}
 	
-	public boolean isWhiteVerticalLine(String pdfFilePath, int pageNum, int x) throws AWTException{
+	/**
+	 * 对某一页模拟画线
+	 * @param pdfFilePath
+	 * @param pageNum
+	 * @param x
+	 * @return
+	 * @throws AWTException
+	 */
+	public boolean simIsWhiteVerticalLine(String pdfFilePath, int pageNum, int x) throws AWTException{
 		closeFoxit(foxitAppName);
 		robotMngr.delay(delay_middle);
 		openPdfByFoxit(foxitAppPath, pdfFilePath);

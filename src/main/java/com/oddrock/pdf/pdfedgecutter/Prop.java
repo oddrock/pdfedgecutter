@@ -17,6 +17,10 @@ public class Prop {
 		return PR.getValue(key);
 	}
 	
+	public static int getInt(String key){
+		return PR.getIntValue(key);
+	}
+	
 	public static String get(String key, String defaultValue) {
 		return PR.getValue(key, defaultValue);
 	}
