@@ -749,16 +749,25 @@ public class PdfEdgeCutter {
 	}
 	
 	public void sendMail(String content) throws UnsupportedEncodingException, MessagingException{
-		String senderAccount = Prop.get("mail.sender.account");
-		String senderPasswd = Prop.get("mail.sender.passwd");
-		String recverAccounts = Prop.get("mail.recver.accounts");
-		EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
+		String senderAccount = null;
+		String senderPasswd = null;
+		String recverAccounts = Prop.get("notice.mail.recver.accounts");
+		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
+			senderAccount = Prop.get("notice.mail.sender.qq.account");
+			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
+			EmailManager.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, "587");
+		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
+			senderAccount = Prop.get("notice.mail.sender.163.account");
+			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
+			EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
+		}
 	}
 	
-	public static void main(String[] args) {		
+	public static void main(String[] args) {
+		boolean isDemo =true;
 		try{
 			boolean demo= Boolean.parseBoolean(Prop.get("demo.flag"));
-			demo = true;
+			demo = isDemo;
 			String foxitAppPath = Prop.get("foxit.path");
 			String foxitAppName = Prop.get("foxit.appname");
 			boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));

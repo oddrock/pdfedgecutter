@@ -17,6 +17,13 @@ public class EmailSent {
 	private String contentEncoding;
 	private Date sendTime;
 	private String senderPasswd;
+	private String smtpPort;
+	public String getSmtpPort() {
+		return smtpPort;
+	}
+	public void setSmtpPort(String smtpPort) {
+		this.smtpPort = smtpPort;
+	}
 	public String getProtocol() {
 		return protocol;
 	}
@@ -112,7 +119,7 @@ public class EmailSent {
 		recverAccounts = new HashSet<String>();
 		protocol = "smtp";
 		debug = false;
-		smtpAuth = true;
+		smtpAuth = false;
 		contentEncoding = "text/html;charset=UTF-8";
 		sendTime = new Date();
 	}
