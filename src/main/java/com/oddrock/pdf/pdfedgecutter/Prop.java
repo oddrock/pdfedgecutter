@@ -21,6 +21,10 @@ public class Prop {
 		return PR.getIntValue(key);
 	}
 	
+	public static boolean getBool(String key){
+		return PR.getBooleanValue(key);
+	}
+	
 	public static String get(String key, String defaultValue) {
 		return PR.getValue(key, defaultValue);
 	}

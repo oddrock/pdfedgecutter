@@ -59,6 +59,10 @@ public class PropertiesReader {
 	public int getIntValue(String key){
 		return Integer.parseInt(getValue(key));
 	}
+	
+	public boolean getBooleanValue(String key){
+		return Boolean.parseBoolean(getValue(key));
+	}
 
 	public String getValue(String key, String defaultValue) {
 		if (properties.containsKey(key)) {

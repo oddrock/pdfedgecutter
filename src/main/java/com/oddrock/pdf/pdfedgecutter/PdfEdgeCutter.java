@@ -12,6 +12,7 @@ import java.io.UnsupportedEncodingException;
 import com.oddrock.common.awt.RobotManager;
 import com.oddrock.common.email.EmailManager;
 import com.oddrock.common.file.FileUtils;
+import com.oddrock.common.media.WavPlayer;
 import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.pdf.PdfSize;
 import com.oddrock.common.windows.ClipboardUtils;
@@ -25,6 +26,8 @@ import java.awt.image.BufferedImage;
 
 import javax.imageio.ImageIO;
 import javax.mail.MessagingException;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.UnsupportedAudioFileException;
 
 import org.apache.log4j.Logger;
 import org.jnativehook.NativeHookException;
@@ -630,10 +633,13 @@ public class PdfEdgeCutter {
 	 * @param newDirPath
 	 * @throws IOException 
 	 * @throws AWTException 
+	 * @throws MessagingException 
+	 * @throws LineUnavailableException 
+	 * @throws UnsupportedAudioFileException 
 	 */
 	public void cutWhiteEdgeBatch(String pdfDirPath, 
 			boolean renameFlag, String addstr, 
-			boolean newDirFlag, String newDirPath, boolean demo) throws AWTException, IOException{
+			boolean newDirFlag, String newDirPath, boolean demo) throws AWTException, IOException, MessagingException, UnsupportedAudioFileException, LineUnavailableException{
 		FileUtils.writeLineToFile(logPath, "-----切PDF白边  开始时间："+ DateUtils.getFormatTime() +"-----", false);
 		closeNotepadpp();
 		PdfEdgeCutTimer timer = new PdfEdgeCutTimer();
@@ -671,7 +677,19 @@ public class PdfEdgeCutter {
 		FileUtils.writeLineToFile(logPath, "共耗 "+df.format(Math.floor((double)timer.getElapsedTimeInSeconds()/(double)60))+" 分钟", true);
 		FileUtils.writeLineToFile(logPath, "平均每100页耗时 "+df.format(timer.getElapsedTimeInSeconds()/(double)timer.getPageCount()*100)+" 秒", true);
 		FileUtils.writeLineToFile(logPath, "-----切PDF白边  结束时间："+ DateUtils.getFormatTime() +"-----", true);
-		openCutResultByNotepadpp();
+		noticeAfterFinish();
+	}
+	
+	private void noticeAfterFinish() throws MessagingException, UnsupportedAudioFileException, IOException, LineUnavailableException{
+		if(Prop.getBool("notice.txt.flag")){
+			openCutResultByNotepadpp();
+		}
+		if(Prop.getBool("notice.mail.flag")){
+			sendMail("所有PDF切白边已完成！！！");
+		}
+		if(Prop.getBool("notice.sound.flag")){
+			WavPlayer.play(Prop.get("notice.sound.wavpath"), Prop.getInt("notice.sound.playcount"));
+		}
 	}
 	
 	/**
@@ -737,7 +755,7 @@ public class PdfEdgeCutter {
 		EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
 	}
 	
-	public static void main(String[] args) throws IOException, AWTException, NativeHookException, MessagingException {		
+	public static void main(String[] args) {		
 		try{
 			boolean demo= Boolean.parseBoolean(Prop.get("demo.flag"));
 			demo = true;
@@ -758,8 +776,7 @@ public class PdfEdgeCutter {
 				demo = Boolean.parseBoolean(args[0]);
 			}
 			PdfEdgeCutter cutter = new PdfEdgeCutter(needEscKey, foxitAppPath, foxitAppName, scX, scY, scWidth, scHeight,adjuststeplength);
-			cutter.cutWhiteEdgeBatch(srcDirPath, rename, apendName, newdir, dstDirPath, demo);
-			cutter.sendMail("所有PDF切白边已完成！！！");
+			cutter.cutWhiteEdgeBatch(srcDirPath, rename, apendName, newdir, dstDirPath, demo);		
 		}catch(Exception e){
 			e.printStackTrace();
 		}finally{
