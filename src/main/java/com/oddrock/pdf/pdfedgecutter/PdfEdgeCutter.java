@@ -766,7 +766,7 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) {
 		try{
 			boolean demo= Boolean.parseBoolean(Prop.get("demo.flag"));
-			demo = true;
+			demo = false;
 			String foxitAppPath = Prop.get("foxit.path");
 			String foxitAppName = Prop.get("foxit.appname");
 			boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));
