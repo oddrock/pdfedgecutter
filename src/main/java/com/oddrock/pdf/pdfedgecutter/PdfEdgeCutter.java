@@ -755,7 +755,7 @@ public class PdfEdgeCutter {
 		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
-			EmailManager.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, "587");
+			EmailManager.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
 		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
 			senderAccount = Prop.get("notice.mail.sender.163.account");
 			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
@@ -766,7 +766,7 @@ public class PdfEdgeCutter {
 	public static void main(String[] args) {
 		try{
 			boolean demo= Boolean.parseBoolean(Prop.get("demo.flag"));
-			demo = false;
+			demo = true;
 			String foxitAppPath = Prop.get("foxit.path");
 			String foxitAppName = Prop.get("foxit.appname");
 			boolean needEscKey = Boolean.parseBoolean(Prop.get("needesckey"));
