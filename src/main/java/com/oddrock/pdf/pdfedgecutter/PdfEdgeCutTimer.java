@@ -6,7 +6,7 @@ import javax.mail.MessagingException;
 
 import org.apache.log4j.Logger;
 
-import com.oddrock.common.email.EmailManager;
+import com.oddrock.common.mail.MailSender;
 
 public class PdfEdgeCutTimer {
 	private static Logger logger = Logger.getLogger(PdfEdgeCutTimer.class);
@@ -78,7 +78,7 @@ public class PdfEdgeCutTimer {
 		String senderAccount = Prop.get("mail.sender.account");
 		String senderPasswd = Prop.get("mail.sender.passwd");
 		String recverAccounts = Prop.get("mail.recver.accounts");
-		EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, "测试短信：PDF切白边已完成007");
+		MailSender.sendEmailFast(senderAccount, senderPasswd, recverAccounts, "测试短信：PDF切白边已完成007");
 	}
 
 }

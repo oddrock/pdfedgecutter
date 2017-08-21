@@ -10,8 +10,8 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import com.oddrock.common.awt.RobotManager;
-import com.oddrock.common.email.EmailManager;
 import com.oddrock.common.file.FileUtils;
+import com.oddrock.common.mail.MailSender;
 import com.oddrock.common.media.WavPlayer;
 import com.oddrock.common.pdf.PdfManager;
 import com.oddrock.common.pdf.PdfSize;
@@ -755,11 +755,11 @@ public class PdfEdgeCutter {
 		if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("qq")){
 			senderAccount = Prop.get("notice.mail.sender.qq.account");
 			senderPasswd = Prop.get("notice.mail.sender.qq.passwd");
-			EmailManager.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
+			MailSender.sendEmailFastByAuth(senderAccount, senderPasswd, recverAccounts, content, Prop.get("notice.mail.sender.qq.smtpport"));
 		}else if(Prop.get("notice.mail.sender.type").equalsIgnoreCase("163")) {
 			senderAccount = Prop.get("notice.mail.sender.163.account");
 			senderPasswd = Prop.get("notice.mail.sender.163.passwd");
-			EmailManager.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
+			MailSender.sendEmailFast(senderAccount, senderPasswd, recverAccounts, content);
 		}
 	}
 	
